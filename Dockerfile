@@ -36,7 +36,7 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # 10. Cấp quyền cho script khởi động và thư mục storage
 COPY start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/yt-trend-finder/storage /var/www/yt-trend-finder/bootstrap/cache
 
 # 11. Mở cổng 80
 EXPOSE 80
