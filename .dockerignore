@@ -5,3 +5,4 @@ vendor
 .gitignore
 Dockerfile
 docker-compose.yml
+bootstrap/cache/*.php

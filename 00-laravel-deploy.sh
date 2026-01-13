@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 echo "Running Deploy Script..."
 
-# Cache cấu hình để tăng tốc độ
+# Xóa sạch cache cũ (fix lỗi 404 trang con)
+php artisan optimize:clear
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+
+# Cache lại những thứ an toàn
 php artisan config:cache
-php artisan route:cache
 php artisan view:cache
 
-# Chạy migrate database (Force để chạy trên production)
+# Migrate database
 echo "Running Migrations..."
 php artisan migrate --force
