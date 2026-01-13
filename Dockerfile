@@ -1,45 +1,24 @@
-# 1. Dùng Image PHP 8.2 FPM chính chủ
-FROM php:8.2-fpm
+FROM richarvey/nginx-php-fpm:latest
 
-# 2. Cài đặt các thư viện hệ thống cần thiết và Nginx
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    nginx
+# Copy toàn bộ code vào container
+COPY . /var/www/html
 
-# 3. Xóa cache apt để giảm dung lượng image
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+# Cấu hình đường dẫn và các biến môi trường cơ bản cho Image
+ENV WEBROOT=/var/www/html/public
+ENV PHP_ERRORS_STDERR=1
+ENV RUN_SCRIPTS=1
+ENV REAL_IP_HEADER=1
+ENV APP_ENV=production
+ENV APP_DEBUG=false
+ENV LOG_CHANNEL=stderr
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# 4. Cài đặt các PHP Extensions cần cho Laravel
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+# Copy cấu hình Nginx riêng
+COPY nginx-site.conf /var/www/html/conf/nginx/nginx-site.conf
 
-# 5. Cài đặt Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Copy và cấp quyền chạy cho script deploy
+COPY 00-laravel-deploy.sh /var/www/html/scripts/00-laravel-deploy.sh
+RUN chmod +x /var/www/html/scripts/00-laravel-deploy.sh
 
-# 6. Thiết lập thư mục làm việc
-WORKDIR /var/www/yt-trend-finder
-
-# 7. Copy toàn bộ code vào container
-COPY . .
-
-# 8. Cài đặt các gói thư viện Laravel (Dependencies)
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
-
-# 9. Copy cấu hình Nginx vào đúng chỗ
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# 10. Cấp quyền cho script khởi động và thư mục storage
-COPY start.sh /usr/local/bin/start.sh
-RUN chmod +x /usr/local/bin/start.sh
-RUN chown -R www-data:www-data /var/www/yt-trend-finder/storage /var/www/yt-trend-finder/bootstrap/cache
-
-# 11. Mở cổng 80
-EXPOSE 80
-
-# 12. Chạy script khởi động
-CMD ["/usr/local/bin/start.sh"]
+# Cài đặt các thư viện PHP
+RUN composer install --no-dev --working-dir=/var/www/html
