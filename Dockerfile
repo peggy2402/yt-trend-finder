@@ -22,7 +22,7 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # 6. Thiết lập thư mục làm việc
-WORKDIR /var/www/html
+WORKDIR /var/www/yt-trend-finder
 
 # 7. Copy toàn bộ code vào container
 COPY . .
