@@ -1,23 +1,25 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="dark"> <!-- Mặc định Dark Mode -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZTGroup Analytics | Ultimate Hunter V3.8</title>
+    <title>ZTGroup Analytics | Ultimate Hunter Beta V0.1.5</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Icons (Fixed CDN) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     
     <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/vi.min.js"></script>
-    <!-- Tailwind Config cho Dark Mode -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -25,457 +27,362 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        dark: {
-                            bg: '#0f172a', // Slate 900
-                            card: '#1e293b', // Slate 800
-                            border: '#334155', // Slate 700
-                            text: '#f1f5f9' // Slate 100
-                        }
+                        primary: '#FF0000',
+                        dark: '#0F0F0F',
+                        surface: '#1F1F1F',
+                        light: '#F3F4F6',
+                        'surface-light': '#FFFFFF'
                     }
                 }
             }
         }
     </script>
-    <link rel="stylesheet" href="{{asset('css/style.css')}}">
-    <link rel="shortcut icon" href="{{asset('images/logo32.png')}}" type="image/x-icon">
 </head>
+<body class="bg-light text-slate-800 dark:bg-dark dark:text-slate-300 font-sans antialiased min-h-screen flex flex-col selection:bg-red-500 selection:text-white transition-colors duration-300">
 
-<body class="bg-slate-50 text-slate-800 font-sans transition-colors duration-300 dark:bg-dark-bg dark:text-dark-text">
-
-    <div id="toast-container" class="flex flex-col gap-3"></div>
-
-    <!-- HEADER -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm backdrop-blur-md bg-white/95 dark:bg-dark-card/95 dark:border-dark-border transition-colors duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-
-            <div class="flex items-center gap-4">
-                <a href="{{ url('/') }}" class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors" title="Về trang chủ">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5 h-16 transition-colors duration-300">
+        <div class="container mx-auto px-4 h-full flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <!-- Back Button (NEW) -->
+                <a href="/" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-400 transition-colors" title="Quay lại trang chủ">
                     <i class="fa-solid fa-arrow-left"></i>
                 </a>
-                <div class="flex items-center gap-2 sm:gap-3">
-                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center shadow-md">
-                        <i class="fa-brands fa-youtube text-white text-lg sm:text-xl"></i>
+
+                <a href="/" class="flex items-center gap-2 group">
+                    <div class="w-8 h-8 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-red-900/20 group-hover:scale-110 transition-transform">
+                        <i class="fa-brands fa-youtube"></i>
                     </div>
-                    <div class="leading-tight hidden sm:block">
-                        <h1 class="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white">
-                            ZTGroup<span class="text-red-500"> Analytics Beta v0.1.0</span>
-                        </h1>
-                        <p class="text-[9px] sm:text-[10px] text-red-500 font-bold tracking-wide">ULTIMATE HUNTER V0.1.0</p>
-                    </div>
-                </div>
+                    <span class="text-lg font-bold text-gray-900 dark:text-white tracking-tight">ZTGroup <span class="text-red-500">Analytics</span></span>
+                </a>
+                
+                <div class="h-6 w-px bg-gray-300 dark:bg-white/10 mx-2 hidden md:block"></div>
+                <nav class="hidden md:flex gap-1">
+                    <a href="#" class="px-3 py-1.5 text-sm rounded-md bg-gray-200 dark:bg-white/5 text-gray-900 dark:text-white font-medium border border-gray-200 dark:border-white/5">Trend Hunter</a>
+                    <a href="#" class="px-3 py-1.5 text-sm rounded-md hover:bg-gray-200 dark:hover:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors">Keywords</a>
+                </nav>
             </div>
-
+            
             <div class="flex items-center gap-3">
-                <!-- Dark Mode Toggle -->
-                <button onclick="toggleDarkMode()" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-yellow-400 dark:hover:bg-slate-600 flex items-center justify-center transition-all">
-                    <i class="fa-solid fa-moon dark:hidden"></i>
-                    <i class="fa-solid fa-sun hidden dark:block"></i>
+                <!-- Dark Mode Toggle (Mới) -->
+                <button onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-white/10 transition-colors text-slate-600 dark:text-slate-300 shadow-sm border border-gray-200 dark:border-white/5">
+                    <i id="themeIcon" class="fa-solid fa-moon"></i>
                 </button>
 
-                <button onclick="openSettings()" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-full transition shadow-sm group dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700">
-                    <div class="relative">
-                        <i class="fa-solid fa-key group-hover:text-red-500 transition-colors text-sm"></i>
-                        <span id="apiKeyDot" class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-gray-300 rounded-full border border-white dark:border-slate-800"></span>
-                    </div>
-                    <span class="text-xs font-bold hidden sm:inline" id="apiKeyBtnText">Nhập Key</span>
-                </button>
+                <!-- Settings Button + Badge (Mới) -->
+                <div class="relative group">
+                    <button onclick="toggleSettingsModal()" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-white/10 transition-colors text-slate-600 dark:text-slate-300 shadow-sm border border-gray-200 dark:border-white/5">
+                        <i class="fa-solid fa-gear group-hover:rotate-90 transition-transform duration-500"></i>
+                    </button>
+                    <!-- Số lượng API Key -->
+                    <span id="activeKeyCountBadge" class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-green-500 text-[10px] text-white font-bold shadow-sm hidden animate__animated animate__bounceIn">
+                        0
+                    </span>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- MAIN CONTENT -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-grow">
-        
-        <!-- SEARCH & FILTER BOX -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 mb-6 sm:mb-8 dark:bg-dark-card dark:border-dark-border transition-colors duration-300">
-            <!-- Search Row -->
-            <div class="flex flex-col md:flex-row gap-4 items-end mb-4">
-                <div class="flex-grow w-full">
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider dark:text-slate-400">Từ khóa Ngách (Seed Keyword)</label>
-                    <div class="relative group">
-                        <input type="text" id="keyword" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:bg-white outline-none transition-all font-medium text-slate-700 shadow-sm placeholder:text-slate-400" placeholder="VD: Street Food, Review Xe...">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-red-500 transition-colors dark:text-slate-500"></i>
-                    </div>
-                </div>
-                
-                <div class="w-full md:w-auto">
-                    <button onclick="analyzeKeywords()" id="analyzeBtn" class="w-full md:w-48 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 transform active:scale-95 shadow-red-600/30">
-                        <span>PHÂN TÍCH</span>
-                        <i class="fa-solid fa-radar"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Advanced Filters Toggle & Deep Scan -->
-            <div class="border-t border-slate-100 pt-4 flex flex-col sm:flex-row justify-between items-center gap-4 dark:border-slate-700">
-                <button onclick="toggleFilters()" class="flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-red-600 transition w-full sm:w-auto justify-center sm:justify-start dark:text-slate-300 dark:hover:text-red-400">
-                    <i class="fa-solid fa-sliders"></i> Tùy chỉnh Bộ lọc
-                    <i class="fa-solid fa-chevron-down text-xs transition-transform" id="filterArrow"></i>
-                </button>
-                
-                <!-- NEW SMOOTH DEEP SCAN TOGGLE (FIXED LAYOUT) -->
-                <label class="inline-flex items-center cursor-pointer group bg-slate-50 sm:bg-transparent px-3 py-2 sm:p-0 rounded-lg w-full sm:w-auto justify-center sm:justify-start dark:bg-slate-800 sm:dark:bg-transparent">
-                    <div class="relative">
-                        <input type="checkbox" id="deepScanToggle" class="sr-only peer">
-                        <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600 shadow-inner dark:bg-slate-600 dark:after:border-slate-500"></div>
-                    </div>
-                    <span class="ml-3 text-xs font-bold text-slate-600 uppercase group-hover:text-red-600 transition-colors select-none dark:text-slate-300 dark:group-hover:text-red-400">
-                        <i class="fa-solid fa-layer-group mr-1"></i> Quét Sâu (Max 250)
-                    </span>
-                </label>
-            </div>
-
-            <!-- Hidden Filters -->
-            <div id="advancedFilters" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in mt-4 pt-4 border-t border-dashed border-slate-200 dark:border-slate-700">
-                <!-- Time -->
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase dark:text-slate-400">Khoảng Thời Gian</label>
-                    <select id="filterTime" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-red-500 outline-none h-10 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
-                        <option value="any">Toàn thời gian</option>
-                        <option value="hour">1 Giờ qua</option>
-                        <option value="today">Hôm nay (24h)</option>
-                        <option value="week">Tuần này</option>
-                        <option value="month" selected>Tháng này</option>
-                        <option value="year">Năm nay</option>
-                    </select>
-                </div>
-                
-                <!-- Region -->
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase dark:text-slate-400">Thị trường / Quốc gia</label>
-                    <select id="filterRegion" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-red-500 outline-none h-10 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
-                        <option value="GLOBAL">🌍 Global (Toàn cầu)</option>
-                        
-                        <optgroup label="💰 Top Tier 1 (RPM Cao)">
-                            <option value="US">🇺🇸 Hoa Kỳ (USA)</option>
-                            <option value="GB">🇬🇧 Anh Quốc (UK)</option>
-                            <option value="CA">🇨🇦 Canada</option>
-                            <option value="AU">🇦🇺 Úc (Australia)</option>
-                            <option value="DE">🇩🇪 Đức (Germany)</option>
-                            <option value="CH">🇨🇭 Thụy Sĩ</option>
-                            <option value="NO">🇳🇴 Na Uy</option>
-                        </optgroup>
-
-                        <optgroup label="🌏 Châu Á (Asia)">
-                            <option value="VN" selected>🇻🇳 Việt Nam</option>
-                            <option value="JP">🇯🇵 Nhật Bản</option>
-                            <option value="KR">🇰🇷 Hàn Quốc</option>
-                            <option value="IN">🇮🇳 Ấn Độ</option>
-                            <option value="ID">🇮🇩 Indonesia</option>
-                            <option value="TH">🇹🇭 Thái Lan</option>
-                            <option value="SG">🇸🇬 Singapore</option>
-                            <option value="PH">🇵🇭 Philippines</option>
-                            <option value="MY">🇲🇾 Malaysia</option>
-                            <option value="TW">🇹🇼 Đài Loan</option>
-                            <option value="HK">🇭🇰 Hồng Kông</option>
-                        </optgroup>
-
-                        <optgroup label="🏰 Châu Âu (Europe)">
-                            <option value="FR">🇫🇷 Pháp (France)</option>
-                            <option value="ES">🇪🇸 Tây Ban Nha</option>
-                            <option value="IT">🇮🇹 Ý (Italy)</option>
-                            <option value="RU">🇷🇺 Nga (Russia)</option>
-                            <option value="NL">🇳🇱 Hà Lan</option>
-                            <option value="SE">🇸🇪 Thụy Điển</option>
-                            <option value="PL">🇵🇱 Ba Lan</option>
-                            <option value="UA">🇺🇦 Ukraine</option>
-                            <option value="TR">🇹🇷 Thổ Nhĩ Kỳ</option>
-                        </optgroup>
-
-                        <optgroup label="🌎 Châu Mỹ (Americas)">
-                            <option value="BR">🇧🇷 Brazil</option>
-                            <option value="MX">🇲🇽 Mexico</option>
-                            <option value="AR">🇦🇷 Argentina</option>
-                            <option value="CO">🇨🇴 Colombia</option>
-                            <option value="CL">🇨🇱 Chile</option>
-                            <option value="PE">🇵🇪 Peru</option>
-                        </optgroup>
-
-                        <optgroup label="🦁 Châu Phi (Africa)">
-                            <option value="ZA">🇿🇦 Nam Phi (South Africa)</option>
-                            <option value="EG">🇪🇬 Ai Cập (Egypt)</option>
-                            <option value="NG">🇳🇬 Nigeria</option>
-                            <option value="KE">🇰🇪 Kenya</option>
-                            <option value="MA">🇲🇦 Ma-rốc</option>
-                        </optgroup>
-
-                        <optgroup label="🦘 Châu Đại Dương (Oceania)">
-                            <option value="NZ">🇳🇿 New Zealand</option>
-                            <option value="FJ">🇫🇯 Fiji</option>
-                        </optgroup>
-
-                        <optgroup label="❄️ Châu Nam Cực & Khác">
-                            <option value="AQ">🇦🇶 Nam Cực (Antarctica)</option>
-                            <option value="IL">🇮🇱 Israel</option>
-                            <option value="SA">🇸🇦 Ả Rập Xê Út</option>
-                            <option value="AE">🇦🇪 UAE</option>
-                        </optgroup>
-                    </select>
-                </div>
-                
-                <!-- Format -->
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase dark:text-slate-400">Định dạng</label>
-                    <select id="filterFormat" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-red-500 outline-none h-10 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
-                        <option value="any" selected>Tất cả</option>
-                        <option value="video">Video Dài (Long Form)</option>
-                        <option value="short">Shorts (< 60s)</option>
-                    </select>
-                </div>
-
-                <!-- Max Results -->
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase dark:text-slate-400">Số lượng quét</label>
-                    <div class="relative">
-                        <input type="number" id="maxResults" value="50" min="1" max="50" class="w-full pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-red-500 outline-none font-bold text-slate-700 h-10 dark:bg-slate-800 dark:border-slate-700 dark:text-white" placeholder="50">
-                        <span class="absolute right-3 top-2.5 text-xs text-slate-400">Vid</span>
-                    </div>
-                </div>
-
-               <!-- Post-Filters -->
-                <div class="col-span-1 sm:col-span-2 md:col-span-4 flex gap-4 pt-2">
-                    <div class="w-1/2">
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase dark:text-slate-400">Lọc Min Views</label>
-                        <input type="number" id="minViews" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none placeholder:text-slate-400 h-10 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-600" placeholder="VD: 10000">
-                    </div>
-                    <div class="w-1/2">
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase dark:text-slate-400">Lọc Min Subs</label>
-                        <input type="number" id="minSubs" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none placeholder:text-slate-400 h-10 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-600" placeholder="VD: 1000">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- LOADING -->
-        <div id="loading" class="hidden py-12 text-center animate-fade-in">
-            <div class="inline-block relative">
-                <div class="w-16 h-16 border-4 border-red-200 border-t-red-600 rounded-full animate-spin dark:border-slate-700 dark:border-t-red-500"></div>
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-red-600 text-lg">
-                    <i class="fa-brands fa-youtube"></i>
-                </div>
-            </div>
-            <h3 class="text-slate-800 font-bold text-xl mt-4 dark:text-white" id="loadingTitle">Đang vận hành Radar...</h3>
-            <p class="text-slate-500 text-sm mt-1 font-mono dark:text-slate-400" id="loadingText">Đang khởi tạo kết nối...</p>
-        </div>
-
-        <!-- RESULTS DASHBOARD -->
-        <div id="resultsArea" class="hidden space-y-6 animate-fade-in">
+    <!-- Main Content -->
+    <main class="pt-24 pb-12 flex-grow">
+        <div class="container mx-auto px-4">
             
-            <!-- SECTION 1: VERDICT - KING KEYWORD - RPM -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Grid Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                <!-- 1. Verdict (Đã làm mới UI) -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col relative dark:bg-dark-card dark:border-dark-border">
-                    <!-- Header -->
-                    <div class="p-6 pb-0">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest dark:text-slate-500">KẾT LUẬN CHIẾN LƯỢC</span>
-                        </div>
-                        <h2 class="text-2xl font-black text-slate-800 dark:text-white" id="verdictText">--</h2>
-                        <p class="text-slate-500 text-sm leading-relaxed dark:text-slate-400 mt-1" id="verdictDesc">Chưa có dữ liệu phân tích.</p>
-                    </div>
-
-                    <!-- Gauge Chart Area -->
-                    <div class="flex-1 flex flex-col items-center justify-center p-6" id="verdictGaugeArea">
-                        <!-- Placeholder khi chưa chạy -->
-                        <div class="text-slate-300 text-sm animate-pulse">Đang chờ dữ liệu...</div>
-                    </div>
-
-                    <!-- Footer Stats -->
-                    <div class="grid grid-cols-3 gap-2 p-4 border-t border-slate-100 bg-slate-50/50 dark:bg-slate-800/50 dark:border-slate-700">
-                        <div class="text-center">
-                            <span class="block text-[10px] font-bold text-slate-400 uppercase">Avg Views</span>
-                            <strong id="statVolume" class="text-sm text-slate-700 dark:text-slate-200">--</strong>
-                        </div>
-                        <div class="text-center border-l border-slate-200 dark:border-slate-700">
-                            <span class="block text-[10px] font-bold text-slate-400 uppercase">Đối thủ</span>
-                            <strong id="statComp" class="text-sm text-slate-700 dark:text-slate-200">--</strong>
-                        </div>
-                        <div class="text-center border-l border-slate-200 dark:border-slate-700">
-                            <span class="block text-[10px] font-bold text-slate-400 uppercase">Điểm</span>
-                            <strong id="statScoreBottom" class="text-sm text-slate-700 dark:text-slate-200">--</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. KING KEYWORD -->
-                <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl shadow-sm border border-orange-100 p-6 relative overflow-hidden flex flex-col dark:from-yellow-900/20 dark:to-orange-900/20 dark:border-orange-900/50">
-                    <div class="absolute top-0 right-0 -mt-2 -mr-2 w-24 h-24 bg-yellow-400 rounded-full opacity-10 blur-xl dark:opacity-5"></div>
-                    <div class="flex justify-between items-start mb-4 relative z-10">
-                        <div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="text-xs font-bold text-orange-600 uppercase tracking-widest dark:text-orange-400">TỪ KHÓA HOT</span>
-                                <i class="fa-solid fa-crown text-yellow-500 animate-bounce"></i>
-                            </div>
-                            <h3 class="text-xl font-extrabold text-slate-900 capitalize break-words line-clamp-1 dark:text-white" id="kingKeyword">---</h3>
-                            <p class="text-xs text-slate-500 mt-1 dark:text-slate-400">Xuất hiện <span id="kingCount" class="font-bold text-orange-600 dark:text-orange-400">0</span> lần</p>
-                        </div>
-                        <div class="bg-white p-2 rounded-lg shadow-sm text-yellow-600 dark:bg-slate-800 dark:text-yellow-500"><i class="fa-solid fa-tags"></i></div>
-                    </div>
-                    <div class="relative z-10 border-t border-orange-200/50 pt-3 flex-grow dark:border-orange-800/30">
-                        <h4 class="text-[10px] font-bold text-slate-400 uppercase mb-2">Các từ khóa phổ biến khác:</h4>
-                        <div id="topKeywordsList" class="space-y-2 text-sm"></div>
-                    </div>
-                </div>
-
-                <!-- 3. RPM -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-center relative dark:bg-dark-card dark:border-dark-border">
-                    <h3 class="font-bold text-slate-800 mb-1 text-xs uppercase tracking-wide flex items-center gap-2 dark:text-slate-200">
-                        <i class="fa-solid fa-hand-holding-dollar text-green-600"></i> Điều chỉnh RPM
-                    </h3>
-                    <div class="text-center my-2">
-                        <span class="text-3xl font-black text-slate-800 dark:text-white" id="rpmDisplay">$0.3</span>
-                        <span class="text-xs text-slate-400">/ 1k views</span>
-                    </div>
-                    <input type="range" id="rpmSlider" min="0.1" max="10.0" step="0.1" value="0.3" class="w-full cursor-pointer" oninput="updateRpm(this.value)">
-                </div>
-            </div>
-
-            <!-- ROW 2: MICRO-NICHES -->
-            <div id="microNicheContainer" class="hidden">
-                <div class="flex items-center gap-2 mb-4 mt-2">
-                    <div class="bg-indigo-600 text-white p-1.5 rounded-lg shadow-sm"><i class="fa-solid fa-dna text-sm"></i></div>
-                    <div>
-                        <h3 class="font-bold text-slate-800 text-base dark:text-white">Gợi ý Ngách Tiềm Năng (Micro-Niche)</h3>
-                        <p class="text-[10px] text-slate-500 font-medium dark:text-slate-400">Hệ thống tự động phát hiện các cụm chủ đề nhỏ.</p>
-                    </div>
-                </div>
-                <div id="microNicheGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-            </div>
-
-            <!-- ROW 3: COMPETITORS & HEATMAP -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Competitors -->
-                <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-sm border border-slate-200 dark:bg-dark-card dark:border-dark-border">
-                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase dark:text-white">
-                        <i class="fa-solid fa-trophy text-yellow-500"></i> Top Kênh Thống Trị
-                    </h3>
-                    <div id="competitorList" class="space-y-2"></div>
-                </div>
-
-                <!-- Heatmap -->
-                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200 dark:bg-dark-card dark:border-dark-border">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm uppercase dark:text-white">
-                            <i class="fa-solid fa-clock text-blue-500"></i> Thời Gian Đăng Hiệu Quả
+                <!-- Left Sidebar (Filter) -->
+                <div class="lg:col-span-3 space-y-6">
+                    <!-- Search Box -->
+                    <div class="bg-surface-light dark:bg-surface rounded-2xl p-5 border border-gray-200 dark:border-white/5 shadow-xl transition-colors duration-300">
+                        <h3 class="text-gray-900 dark:text-white font-bold mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-filter text-red-500"></i> Bộ Lọc Tìm Kiếm
                         </h3>
-                        <span class="text-xs text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded dark:bg-blue-900/30 dark:text-blue-400" id="bestTimeText">--</span>
-                    </div>
-                    <div id="uploadHeatmap" class="h-32 flex items-end justify-between gap-1 mb-2"></div>
-                    <div class="flex justify-between text-[10px] text-slate-400 font-mono border-t border-slate-100 pt-2 dark:border-slate-700">
-                        <span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>23h</span>
-                    </div>
-                </div>
-            </div>
+                        
+                        <div class="space-y-4">
+                            <!-- API Key Input -->
+                            <div>
+                                <label class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase mb-1.5 block">YouTube API Key <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-key absolute left-3 top-3 text-slate-400 dark:text-slate-500 text-sm"></i>
+                                    <input type="password" id="apiKeyInput" placeholder="Dán API Key vào đây..." class="w-full bg-gray-50 dark:bg-dark border border-gray-200 dark:border-white/10 rounded-xl py-2.5 pl-9 pr-8 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600">
+                                    <button onclick="toggleApiKeyVisibility()" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
+                                        <i id="apiKeyToggleIcon" class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="flex justify-between items-center mt-1">
+                                    <span id="apiKeyStatus" class="text-[10px] text-slate-500">Chưa nhập key</span>
+                                    <button onclick="saveApiKey()" class="text-[10px] text-red-500 hover:text-red-400 font-medium">Lưu Key</button>
+                                </div>
+                            </div>
 
-            <!-- ROW 4: VIDEO TABLE / CARD LIST -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden dark:bg-dark-card dark:border-dark-border">
-                <div class="px-4 sm:px-6 py-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-center gap-3 dark:border-slate-700 dark:bg-slate-800/50">
-                    <h3 class="font-bold text-slate-800 text-sm uppercase flex items-center gap-2 dark:text-white">
-                        <i class="fa-solid fa-list-ul"></i> Kết quả Quét (<span id="resultCount">0</span>)
-                    </h3>
-                    <button onclick="exportCSV()" class="text-xs bg-white border border-slate-300 hover:bg-green-50 hover:text-green-700 hover:border-green-300 text-slate-700 px-3 py-1.5 rounded shadow-sm font-bold transition flex items-center gap-1 w-full sm:w-auto justify-center dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-green-900/30 dark:hover:text-green-400">
-                        <i class="fa-solid fa-file-excel"></i> Xuất Excel
-                    </button>
+                            <div>
+                                <label class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase mb-1.5 block">Từ khóa chính</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 dark:text-slate-500 text-sm"></i>
+                                    <input type="text" id="searchInput" placeholder="Nhập chủ đề (vd: AI tools)..." class="w-full bg-gray-50 dark:bg-dark border border-gray-200 dark:border-white/10 rounded-xl py-2.5 pl-9 pr-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase mb-1.5 block">Quốc gia</label>
+                                    <select id="regionSelect" class="w-full bg-gray-50 dark:bg-dark border border-gray-200 dark:border-white/10 rounded-xl py-2.5 px-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-red-500/50 appearance-none">
+                                        <option value="US">🇺🇸 United States</option>
+                                        <option value="VN">🇻🇳 Vietnam</option>
+                                        <!-- Options JS -->
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase mb-1.5 block">Thời gian</label>
+                                    <select id="timeFilter" class="w-full bg-gray-50 dark:bg-dark border border-gray-200 dark:border-white/10 rounded-xl py-2.5 px-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-red-500/50 appearance-none">
+                                        <option value="now">⚡ 24h qua</option>
+                                        <option value="week">📅 7 ngày</option>
+                                        <option value="month">🗓 30 ngày</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button onclick="startAnalysis()" id="analyzeBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-red-900/30 active:scale-95 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-rocket"></i> Phân Tích Ngay
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Trending Niche Keywords (REAL DATA) -->
+                    <div class="bg-surface-light dark:bg-surface rounded-2xl p-5 border border-gray-200 dark:border-white/5 shadow-xl transition-colors duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-gray-900 dark:text-white font-bold flex items-center gap-2">
+                                <i class="fa-solid fa-fire text-orange-500 animate-pulse"></i> Ngách Hot
+                            </h3>
+                            <span class="text-[10px] bg-orange-500/10 text-orange-500 dark:text-orange-400 px-2 py-0.5 rounded border border-orange-500/20">YouTube Trends V3</span>
+                        </div>
+                        
+                        <div class="space-y-3" id="nicheKeywordsList">
+                            <!-- JS render real data here -->
+                            <div class="text-center py-6 text-slate-500 text-xs">
+                                <div class="animate-pulse">
+                                    <i class="fa-brands fa-youtube text-2xl mb-2 text-slate-300 dark:text-slate-700"></i>
+                                </div>
+                                <p>Nhập API Key để xem Trends thật</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-gray-200 dark:border-white/5 text-center">
+                            <button onclick="fetchRealNicheTrends()" class="text-xs text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-white flex items-center justify-center gap-1 mx-auto transition-colors">
+                                <i class="fa-solid fa-sync mr-1"></i> Cập nhật Trend
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- Desktop Table View -->
-                <div class="hidden md:block overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-[10px] uppercase tracking-wider border-b border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400">
-                                <th class="p-4 font-bold w-12">#</th>
-                                <th class="p-4 font-bold max-w-md">Video / Thông tin</th>
-                                <th class="p-4 font-bold text-right">Thị trường</th>
-                                <th class="p-4 font-bold text-right">Loại</th>
-                                <th class="p-4 font-bold text-right">Ngày đăng</th>
-                                <th class="p-4 font-bold text-right">Views</th>
-                                <th class="p-4 font-bold text-right">Kênh (Subs)</th>
-                                <th class="p-4 font-bold text-right text-green-600 dark:text-green-400">Doanh thu ($)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="videoTableBody" class="divide-y divide-slate-100 text-sm dark:divide-slate-700"></tbody>
-                    </table>
-                </div>
+                <!-- Center Content (Results) -->
+                <div class="lg:col-span-9 space-y-6">
+                    
+                    <!-- Stats Overview -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-surface-light dark:bg-surface p-4 rounded-2xl border border-gray-200 dark:border-white/5 metric-card transition-colors duration-300">
+                            <div class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase mb-2">Tổng Video Quét</div>
+                            <div class="text-2xl font-bold text-gray-900 dark:text-white" id="statTotalVideos">0</div>
+                            <div class="text-green-500 text-xs mt-1 font-medium"><i class="fa-solid fa-arrow-up"></i> Live scan</div>
+                        </div>
+                        <div class="bg-surface-light dark:bg-surface p-4 rounded-2xl border border-gray-200 dark:border-white/5 metric-card transition-colors duration-300">
+                            <div class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase mb-2">Avg. Views</div>
+                            <div class="text-2xl font-bold text-gray-900 dark:text-white" id="statAvgViews">0</div>
+                            <div class="text-slate-500 text-xs mt-1 font-medium">Trung bình</div>
+                        </div>
+                         <div class="bg-surface-light dark:bg-surface p-4 rounded-2xl border border-gray-200 dark:border-white/5 metric-card transition-colors duration-300">
+                            <div class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase mb-2">Cơ hội (Score)</div>
+                            <div class="text-2xl font-bold text-green-500 dark:text-green-400" id="statOpportunity">--/10</div>
+                            <div class="text-slate-500 text-xs mt-1 font-medium">Độ cạnh tranh</div>
+                        </div>
+                         <div class="bg-surface-light dark:bg-surface p-4 rounded-2xl border border-gray-200 dark:border-white/5 metric-card transition-colors duration-300">
+                            <div class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase mb-2">RPM Ước tính</div>
+                            <div class="text-2xl font-bold text-yellow-500 dark:text-yellow-400" id="statEstRevenue">$0</div>
+                            <div class="text-slate-500 text-xs mt-1 font-medium">Dựa trên view</div>
+                        </div>
+                    </div>
 
-                <!-- Mobile Card View -->
-                <div id="mobileVideoList" class="md:hidden p-4 space-y-4 bg-slate-50/50 dark:bg-slate-900/50"></div>
-
-                <!-- Pagination -->
-                <div id="paginationControls" class="px-6 py-4 border-t border-slate-200 flex justify-between items-center bg-slate-50 hidden dark:border-slate-700 dark:bg-slate-800">
-                    <span class="text-xs text-slate-500 dark:text-slate-400" id="pageInfo">Trang 1</span>
-                    <div class="flex gap-2" id="paginationBtns"></div>
+                    <!-- Main Table/List -->
+                    <div class="bg-surface-light dark:bg-surface rounded-2xl border border-gray-200 dark:border-white/5 overflow-hidden shadow-xl transition-colors duration-300">
+                        <div class="p-5 border-b border-gray-200 dark:border-white/5 flex flex-wrap items-center justify-between gap-4">
+                            <h3 class="text-gray-900 dark:text-white font-bold text-lg">Kết Quả Phân Tích</h3>
+                            <div class="flex gap-2">
+                                <button onclick="exportCSV()" class="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-800 dark:text-white rounded-lg border border-gray-200 dark:border-white/5 transition-colors">
+                                    <i class="fa-solid fa-download mr-1"></i> Export CSV
+                                </button>
+                                <select onchange="sortVideos(this.value)" class="px-3 py-1.5 text-xs font-medium bg-white dark:bg-dark hover:bg-gray-50 dark:hover:bg-white/5 text-gray-800 dark:text-white rounded-lg border border-gray-200 dark:border-white/10 focus:outline-none">
+                                    <option value="views_desc">Views (Cao -> Thấp)</option>
+                                    <option value="views_asc">Views (Thấp -> Cao)</option>
+                                    <option value="date_desc">Mới nhất</option>
+                                    <option value="subs_asc">Subs (Thấp -> Cao)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 dark:bg-dark/50 text-xs uppercase text-slate-500 dark:text-slate-400 border-b border-gray-200 dark:border-white/5">
+                                        <th class="p-4 font-semibold">Video Topic</th>
+                                        <th class="p-4 font-semibold text-right">Views</th>
+                                        <th class="p-4 font-semibold text-right">Revenue ($)</th>
+                                        <th class="p-4 font-semibold text-right">Published</th>
+                                        <th class="p-4 font-semibold text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm divide-y divide-gray-200 dark:divide-white/5 text-gray-700 dark:text-slate-300" id="resultsBody">
+                                    <tr class="text-center">
+                                        <td colspan="5" class="p-8 text-slate-500 italic">Vui lòng nhập từ khóa và bấm Phân Tích...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="p-4 border-t border-gray-200 dark:border-white/5 flex justify-center gap-2" id="pagination"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- SETTINGS MODAL -->
-    <div id="settingsModal" class="modal fixed inset-0 z-[9000] flex items-center justify-center opacity-0 invisible pointer-events-none">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeSettings()"></div>
-        <div class="bg-white w-full max-w-md mx-4 rounded-2xl shadow-2xl z-10 p-6 relative transform transition-all scale-95 dark:bg-dark-card" id="modalContent">
-            <button onclick="closeSettings()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-            <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 dark:text-white"><i class="fa-solid fa-gear text-slate-600 dark:text-slate-400"></i> Cấu hình Hệ thống</h3>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase dark:text-slate-400">YouTube Data API Keys <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <textarea id="inputApiKey" rows="5" class="w-full px-4 py-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-800 outline-none font-mono dark:bg-slate-800 dark:border-slate-700 dark:text-white" placeholder="Paste danh sách API Key tại đây..."></textarea>
-                        <div class="absolute bottom-2 right-2 text-[10px] text-slate-400 bg-white px-1 dark:bg-slate-800">Mỗi dòng 1 Key</div>
-                    </div>
-                    <p class="text-[10px] text-slate-500 mt-2 italic dark:text-slate-400"><i class="fa-solid fa-circle-info mt-0.5"></i> Hệ thống tự động Failover.</p>
-                </div>
-                <div class="flex justify-end pt-2">
-                    <button onclick="saveApiKey()" class="px-6 py-2.5 text-sm font-bold text-white bg-slate-900 hover:bg-black rounded-lg shadow-lg transition w-full md:w-auto dark:bg-red-600 dark:hover:bg-red-700">Lưu Cấu Hình</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- NICHE MODAL -->
-    <div id="nicheDetailsModal" class="modal fixed inset-0 z-[9000] flex items-center justify-center opacity-0 invisible pointer-events-none">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeNicheModal()"></div>
-        <div class="bg-white w-full max-w-2xl mx-4 rounded-2xl shadow-2xl z-10 p-0 relative transform transition-all scale-95 flex flex-col max-h-[90vh] overflow-hidden dark:bg-dark-card">
-            <!-- Modal Content here (classes update dynamically in JS or keep neutral) -->
-            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 dark:bg-slate-800 dark:border-slate-700">
-                <div class="flex items-center gap-3">
-                    <div class="bg-indigo-600 text-white p-2 rounded-lg"><i class="fa-solid fa-microscope"></i></div>
+    <!-- Niche Detail Modal (UPDATE: Added Strategy Section) -->
+    <div id="nicheModal" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-sm transition-opacity" onclick="closeNicheModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-surface-light dark:bg-surface w-full max-w-2xl rounded-2xl shadow-2xl border border-gray-200 dark:border-white/10 transform transition-all scale-100 flex flex-col max-h-[90vh] transition-colors duration-300">
+                <!-- Modal Header -->
+                <div class="p-6 border-b border-gray-200 dark:border-white/5 flex justify-between items-start">
                     <div>
-                        <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight dark:text-white" id="modalNicheTitle">NGÁCH ABC</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Phân tích chi tiết</p>
+                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1" id="modalTitle">Topic Analysis</h3>
+                         <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">Deep Dive Metrics</span>
+                    </div>
+                    <button onclick="closeNicheModal()" class="text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+                <!-- Modal Body -->
+                <div class="p-6 overflow-y-auto">
+                    <!-- Metrics -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                         <div class="bg-gray-50 dark:bg-dark/50 p-4 rounded-xl border border-gray-200 dark:border-white/5">
+                            <div class="text-xs text-slate-500 uppercase mb-1">Độ cạnh tranh (Ước tính)</div>
+                            <div class="text-lg font-bold text-green-500 dark:text-green-400" id="modalCompetition">--</div>
+                            <div class="w-full bg-gray-200 dark:bg-slate-700 h-1.5 rounded-full mt-2">
+                                <div class="bg-green-500 h-1.5 rounded-full" style="width: 30%"></div>
+                            </div>
+                        </div>
+                         <div class="bg-gray-50 dark:bg-dark/50 p-4 rounded-xl border border-gray-200 dark:border-white/5">
+                            <div class="text-xs text-slate-500 uppercase mb-1">Views/Video (Trung bình)</div>
+                            <div class="text-lg font-bold text-gray-900 dark:text-white" id="modalVolume">--</div>
+                             <div class="w-full bg-gray-200 dark:bg-slate-700 h-1.5 rounded-full mt-2">
+                                <div class="bg-blue-500 h-1.5 rounded-full" style="width: 75%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Channel & Video Info -->
+                    <div class="space-y-4 mb-6">
+                         <div class="bg-white dark:bg-white/5 p-4 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">
+                            <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-crown text-yellow-500"></i> Top Channel Thống Trị</h4>
+                            <div id="modalTopChannel" class="text-gray-900 dark:text-white font-medium">--</div>
+                        </div>
+                        <div class="bg-white dark:bg-white/5 p-4 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">
+                             <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-key text-orange-500"></i> Key Video (Trending)</h4>
+                            <div id="modalKeyVideo" class="text-gray-900 dark:text-white font-medium line-clamp-2">--</div>
+                        </div>
+                    </div>
+
+                    <!-- NEW: STRATEGIC CONCLUSION SECTION -->
+                    <div class="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 border border-indigo-100 dark:border-indigo-500/30 rounded-2xl p-5 relative overflow-hidden mb-6">
+                        <div class="absolute top-0 right-0 -mt-2 -mr-2 w-16 h-16 bg-indigo-500/10 rounded-full blur-xl"></div>
+                        
+                        <h3 class="text-indigo-600 dark:text-indigo-400 font-bold text-lg mb-4 flex items-center gap-2 relative z-10">
+                            <i class="fa-solid fa-chess-knight"></i> KẾT LUẬN CHIẾN LƯỢC
+                        </h3>
+
+                        <div class="space-y-4 relative z-10">
+                            <!-- 1. Ngách Siêu Nhỏ -->
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-white dark:bg-white/10 flex items-center justify-center text-indigo-500 flex-shrink-0 shadow-sm border border-indigo-100 dark:border-white/5">
+                                    <i class="fa-solid fa-diamond"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">💎 Ngách Siêu Nhỏ (Micro-Niche)</div>
+                                    <div id="strategyMicroNiche" class="text-gray-900 dark:text-white font-bold text-sm">--</div>
+                                </div>
+                            </div>
+
+                            <!-- 2. Cluster Chủ Đề -->
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-white dark:bg-white/10 flex items-center justify-center text-pink-500 flex-shrink-0 shadow-sm border border-pink-100 dark:border-white/5">
+                                    <i class="fa-solid fa-network-wired"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Phân tích Cluster Chủ đề</div>
+                                    <div id="strategyCluster" class="text-gray-900 dark:text-white text-sm">--</div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <!-- 3. Khung Giờ Vàng -->
+                                <div class="bg-white/60 dark:bg-black/20 p-3 rounded-lg border border-indigo-100 dark:border-white/5">
+                                    <div class="text-[10px] text-slate-500 uppercase mb-1"><i class="fa-regular fa-clock mr-1"></i> Khung Giờ Vàng</div>
+                                    <div id="strategyBestTime" class="text-orange-500 font-bold">--</div>
+                                </div>
+                                
+                                <!-- 4. Từ Khóa Vua -->
+                                <div class="bg-white/60 dark:bg-black/20 p-3 rounded-lg border border-indigo-100 dark:border-white/5">
+                                    <div class="text-[10px] text-slate-500 uppercase mb-1"><i class="fa-solid fa-crown mr-1 text-yellow-500"></i> Từ Khóa "Vua"</div>
+                                    <div id="strategyKingKeyword" class="text-indigo-500 font-bold truncate" title="Từ khóa lặp lại nhiều nhất">--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                     <div class="mb-2">
+                        <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">📡 Tags (Tín hiệu thị trường)</h4>
+                        <div id="modalChannelList" class="flex flex-wrap gap-2">--</div>
                     </div>
                 </div>
-                <button onclick="closeNicheModal()" class="text-slate-400 hover:text-red-600 transition p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            <div class="p-6 overflow-y-auto">
-                <!-- Dynamic Content injected via JS needs dark mode classes in JS logic -->
-                <div class="mb-6">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">💎 Chiến Lược</h4>
-                    <div class="p-4 bg-indigo-50 border border-indigo-100 rounded-xl text-indigo-900 font-medium text-sm dark:bg-indigo-900/30 dark:border-indigo-800 dark:text-indigo-300" id="modalStrategy">--</div>
+                <div class="px-6 py-4 border-t border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-dark/50 text-right">
+                    <button onclick="closeNicheModal()" class="px-4 py-2 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-700 dark:text-white rounded-lg text-sm font-medium transition-colors">Đóng</button>
+                    <button onclick="startAnalysisFromNiche()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium ml-2 shadow-lg shadow-red-500/30 transition-all">Phân tích sâu từ khóa này</button>
                 </div>
-                <!-- ... other modal parts ... -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm dark:bg-slate-800 dark:border-slate-700">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-crown text-yellow-500"></i> Top Channel</h4>
-                        <div id="modalTopChannel" class="dark:text-white">--</div>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm dark:bg-slate-800 dark:border-slate-700">
-                         <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-key text-orange-500"></i> Key Video</h4>
-                        <div id="modalKeyVideo" class="dark:text-white">--</div>
-                    </div>
-                </div>
-                
-                 <div class="mb-6 mt-6">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">📡 Các kênh tốt</h4>
-                    <div id="modalChannelList" class="flex flex-wrap gap-2">--</div>
-                </div>
-            </div>
-            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 text-right dark:bg-slate-800 dark:border-slate-700">
-                <button onclick="closeNicheModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-sm font-bold transition dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600">Đóng</button>
             </div>
         </div>
     </div>
 
-    <script src="{{asset('js/main.js')}}"></script>
+    <!-- Toast Notification -->
+    <div id="toast-container"></div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal fixed inset-0 z-[70] invisible opacity-0">
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-sm transition-opacity" onclick="toggleSettingsModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-surface w-full max-w-md rounded-2xl shadow-2xl border border-gray-200 dark:border-white/10 p-6 transition-colors duration-300">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Cài Đặt Hệ Thống</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">RPM (Doanh thu/1000 views)</label>
+                        <div class="flex items-center gap-4">
+                            <input type="range" id="rpmSlider" min="0.1" max="10" step="0.1" value="0.3" class="flex-grow h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                            <span id="rpmValue" class="text-gray-900 dark:text-white font-bold w-12 text-right">$0.3</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Quản lý API Key (Nhập mỗi dòng 1 key)</label>
+                        <textarea id="apiKeyList" rows="4" class="w-full bg-gray-50 dark:bg-dark border border-gray-200 dark:border-white/10 rounded-xl p-3 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-red-500/50 font-mono" placeholder="AIzaSy..."></textarea>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button onclick="toggleSettingsModal()" class="px-4 py-2 text-sm text-slate-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white">Hủy</button>
+                    <button onclick="saveSettings()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-bold shadow-lg shadow-red-900/20">Lưu Cài Đặt</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic Script -->
+    <script src="{{ asset('js/main.js') }}"></script>
 </body>
 </html>
