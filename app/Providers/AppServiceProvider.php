@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Nếu đang chạy trên production (Render), ép buộc HTTPS
         if ($this->app->environment('production')) {
-            URL::forceScheme('https');
+            \Illuminate\Support\Facades\URL::forceScheme('https');
         }
     }
 }
