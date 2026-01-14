@@ -1,8 +1,84 @@
 /**
- * NDGroup Analytics Pro - Ultimate Version V4.3
+ * ZT Group Analytics Pro - Ultimate Version V0.5.3
  * Fixed Strategy Display & Deep Scan
  */
+// --- SECURITY & PROTECTION (NEW) ---
+(function() {
+    // 1. Disable Right Click
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
 
+    // 2. Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+    document.addEventListener('keydown', function(e) {
+        // F12
+        if (e.key === 'F12' || e.keyCode === 123) {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+I (DevTools)
+        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+J (Console)
+        if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+C (Inspect Element)
+        if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c' || e.keyCode === 67)) {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+U (View Source)
+        if (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // 3. Detect DevTools Open (Optional - Advanced)
+    // Cảnh báo nếu phát hiện cửa sổ console mở (dựa trên kích thước thay đổi đột ngột hoặc debugger)
+    setInterval(function() {
+        const widthThreshold = window.outerWidth - window.innerWidth > 160;
+        const heightThreshold = window.outerHeight - window.innerHeight > 160;
+        
+        // Kiểm tra cơ bản dựa trên chênh lệch kích thước cửa sổ (thường xảy ra khi bật DevTools docked)
+        // Hoặc kiểm tra các thuộc tính console đặc biệt (tùy trình duyệt)
+        if ((widthThreshold || heightThreshold) && (window.firebug || (window.console && (window.console.firebug || window.console.exception)))) {
+            showDevToolsWarning();
+        }
+        
+        // Kiểm tra bổ sung bằng cách đo thời gian thực thi (DevTools làm chậm debugger)
+        const start = new Date();
+        debugger; // Nếu DevTools mở, nó sẽ dừng ở đây hoặc chạy chậm lại
+        const end = new Date();
+        if (end - start > 100) {
+             showDevToolsWarning();
+        }
+    }, 1000);
+
+    function showDevToolsWarning() {
+        if (!document.getElementById('dev-warning')) {
+            document.body.innerHTML = '';
+            document.body.style.backgroundColor = '#000';
+            document.body.style.color = 'red';
+            document.body.style.display = 'flex';
+            document.body.style.justifyContent = 'center';
+            document.body.style.alignItems = 'center';
+            document.body.style.height = '100vh';
+            document.body.style.textAlign = 'center';
+            document.body.style.fontFamily = 'Arial, sans-serif';
+            document.body.innerHTML = `
+                <div id="dev-warning">
+                    <h1 style="font-size: 24px; margin-bottom: 20px;">PHÁT HIỆN NGƯỜI DÙNG ĐANG BẬT CHỨC NĂNG DEV TOOL.</h1>
+                    <h2 style="font-size: 18px;">VUI LÒNG ĐÓNG ĐỂ TIẾP TỤC SỬ DỤNG</h2>
+                </div>
+            `;
+        }
+    }
+})();
 // --- STATE VARIABLES ---
 let apiKeys = [];
 try {
