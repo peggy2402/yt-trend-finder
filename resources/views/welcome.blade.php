@@ -109,7 +109,27 @@
                     </div>
                 </div>
             </a>
-
+            <a href="{{ url('/shop') }}" class="group relative bg-[#131316] border border-slate-800 rounded-2xl p-1 overflow-hidden hover:border-red-500/50 transition-all duration-300 block">
+                <div class="absolute inset-0 bg-gradient-to-b from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                
+                <div class="bg-[#18181b] rounded-xl p-6 h-full relative z-10 flex flex-col">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="w-12 h-12 bg-red-500/20 text-red-500 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-crosshairs"></i>
+                        </div>
+                        <span class="px-2 py-1 bg-green-500/20 text-green-400 text-[10px] font-bold rounded uppercase border border-green-500/20">Active</span>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold mb-2 group-hover:text-red-400 transition-colors">Thế giới VIA</h3>
+                    <p class="text-slate-400 text-sm mb-6 flex-grow">
+                        Shop Online Chuyên cung cấp nguyên liệu MMO dành cho mọi người. Tham khảo ngay nhé! (Cập nhật mới nhất).
+                    </p>
+                    
+                    <div class="w-full py-3 rounded-lg border border-slate-700 group-hover:bg-red-600 group-hover:border-red-600 group-hover:text-white text-slate-300 font-bold text-center transition-all flex items-center justify-center gap-2">
+                        Truy cập ngay <i class="fa-solid fa-arrow-right-long group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+            </a>
             <!-- Tool 2: Coming Soon -->
             <div class="group relative bg-[#131316] border border-slate-800 rounded-2xl p-1 overflow-hidden opacity-60 hover:opacity-100 transition-all">
                 <div class="bg-[#18181b] rounded-xl p-6 h-full relative z-10 flex flex-col">

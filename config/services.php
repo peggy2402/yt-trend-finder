@@ -34,5 +34,10 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    
+    'thegioivia' => [
+        'base_url' => env('THEGIOIVIA_URL'),
+        'api_key' => env('THEGIOIVIA_API_KEY'),
+    ],
 
 ];
