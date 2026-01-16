@@ -21,11 +21,15 @@ return Application::configure(basePath: dirname(__DIR__))
             Request::HEADER_X_FORWARDED_PROTO |
             Request::HEADER_X_FORWARDED_AWS_ELB
         );
-        
+
+        // Tắt CSRF cho Webhook để SePay bắn tin được
         $middleware->validateCsrfTokens(except: [
             'api/sepay/webhook', 
             'api/*' // Hoặc mở hết cho API
         ]);
+
+        // Trust Proxy cho Render (để không bị lỗi HTTPS)
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

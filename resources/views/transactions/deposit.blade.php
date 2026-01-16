@@ -8,6 +8,23 @@
         </h2>
     </x-slot>
 
+    <!-- Modal Thông báo Thành công (Ẩn mặc định) -->
+    <div id="successModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all opacity-0">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 transform scale-95 transition-all">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                    <i class="fa-solid fa-check text-4xl text-green-600"></i>
+                </div>
+                <h3 class="text-2xl font-extrabold text-slate-800 mb-2">Thanh toán thành công!</h3>
+                <p class="text-slate-500 mb-6">Số tiền <strong class="text-green-600" id="receivedAmount">0đ</strong> đã được cộng vào ví của bạn.</p>
+                
+                <a href="{{ route('dashboard') }}" class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-green-500/30 transition-all">
+                    VÀO MUA HÀNG NGAY <i class="fa-solid fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <div class="py-12 bg-[#f3f4f6] min-h-screen">
         <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
             
@@ -15,17 +32,16 @@
             <div class="mb-8 bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-6 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
                 <div class="relative z-10">
                     <h3 class="font-bold text-xl mb-1 flex items-center gap-2">
-                        <i class="fa-solid fa-bolt text-yellow-400"></i> Hệ thống nạp tự động 24/7
+                        <i class="fa-solid fa-bolt text-yellow-400 animate-pulse"></i> Hệ thống nạp tự động 24/7
                     </h3>
-                    <p class="text-slate-400 text-sm">Tiền sẽ được cộng vào tài khoản sau 1-3 phút kể từ khi chuyển khoản thành công.</p>
+                    <p class="text-slate-400 text-sm">Vui lòng không tắt trình duyệt. Hệ thống sẽ tự động xác nhận sau 1-3 phút.</p>
                 </div>
-                <!-- Decor Background -->
                 <div class="absolute top-0 right-0 w-64 h-64 bg-green-600/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 
-                <!-- CỘT TRÁI: FORM NHẬP (7 phần) -->
+                <!-- CỘT TRÁI: FORM NHẬP -->
                 <div class="lg:col-span-7 space-y-6">
                     <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200">
                         <h3 class="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
@@ -46,7 +62,7 @@
                                 </p>
                             </div>
 
-                            <!-- Nút chọn nhanh (Quick Select) -->
+                            <!-- Nút chọn nhanh -->
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-3">Chọn nhanh</label>
                                 <div class="grid grid-cols-3 sm:grid-cols-3 gap-3">
@@ -59,12 +75,12 @@
                                 </div>
                             </div>
 
-                            <!-- Nội dung chuyển khoản (Quan trọng) -->
+                            <!-- Nội dung chuyển khoản -->
                             <div class="bg-yellow-50 p-5 rounded-xl border border-yellow-200 relative group cursor-pointer transition-all hover:bg-yellow-100" onclick="copySyntax()">
                                 <div class="flex justify-between items-start">
                                     <div>
                                         <p class="text-xs font-bold text-yellow-800 uppercase mb-1">Nội dung chuyển khoản (Bắt buộc)</p>
-                                        <div class="text-2xl font-black text-red-600 tracking-wider font-mono" id="syntaxText">ZT{{Auth::id()}}CKNH</div>
+                                        <div class="text-2xl font-black text-red-600 tracking-wider font-mono" id="syntaxText">ZT{{ Auth::id() }}CKNH</div>
                                     </div>
                                     <div class="bg-white/50 p-2 rounded-lg text-yellow-700 group-hover:bg-white group-hover:text-yellow-800 transition">
                                         <i class="fa-regular fa-copy text-lg"></i>
@@ -82,7 +98,6 @@
                         </div>
                     </div>
 
-                    <!-- Lưu ý -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                         <h4 class="font-bold text-slate-700 mb-3 flex items-center gap-2">
                             <i class="fa-solid fa-circle-question text-blue-500"></i> Lưu ý quan trọng
@@ -95,7 +110,7 @@
                     </div>
                 </div>
 
-                <!-- CỘT PHẢI: HIỂN THỊ QR (5 phần) -->
+                <!-- CỘT PHẢI: HIỂN THỊ QR -->
                 <div class="lg:col-span-5">
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 sticky top-6">
                         <h3 class="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
@@ -112,24 +127,20 @@
                                 <p class="text-slate-500 font-medium">Nhập số tiền và bấm <br>"Tạo mã QR" để hiển thị</p>
                             </div>
                             
-                            <!-- Kết quả QR (Ẩn mặc định) -->
+                            <!-- Kết quả QR -->
                             <div id="qrResult" class="hidden w-full animate-fade-in-up">
                                 <div class="bg-white p-2 rounded-xl border border-green-200 shadow-lg mb-6 inline-block relative group">
-                                    <!-- QR Image -->
                                     <img id="qrImage" src="" class="max-w-full h-auto rounded-lg" alt="VietQR">
-                                    
-                                    <!-- Logo Ngân Hàng chèn giữa (Decor) -->
                                     <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-1 rounded-full shadow-md">
                                         <i class="fa-solid fa-building-columns text-green-600 text-xl"></i>
                                     </div>
                                 </div>
                                 
-                                <!-- Thông tin chi tiết -->
                                 <div id="bankInfo" class="w-full bg-slate-50 rounded-xl border border-slate-200 p-5 text-left space-y-3 shadow-inner">
                                     <div class="flex justify-between items-center border-b border-slate-200 pb-2">
                                         <span class="text-xs font-bold text-slate-400 uppercase">Ngân hàng</span>
                                         <span class="font-bold text-slate-800 flex items-center gap-2">
-                                            <img src="https://tse4.mm.bing.net/th/id/OIP.UaxzHFNzRx-nmr05GDFAmgHaHa?pid=Api&P=0&h=220" class="h-10 w-auto" alt="MB"> MB BANK
+                                            <img src="https://1900.com.vn/storage/uploads/companies/logo/8/lg-1690874569.jpg" class="h-10 w-auto" alt="MB"> MB BANK
                                         </span>
                                     </div>
                                     <div class="flex justify-between items-center border-b border-slate-200 pb-2">
@@ -145,7 +156,7 @@
                                     </div>
                                 </div>
 
-                                <div class="mt-6 flex items-center justify-center gap-2 text-xs text-green-600 font-bold bg-green-50 py-2 rounded-lg">
+                                <div class="mt-6 flex items-center justify-center gap-2 text-xs text-green-600 font-bold bg-green-50 py-2 rounded-lg animate-pulse">
                                     <span class="relative flex h-2 w-2">
                                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                                       <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -161,17 +172,19 @@
         </div>
     </div>
 
+    <!-- Script xử lý Logic -->
     <script>
-        // Set amount from quick buttons
+        // Set số dư hiện tại của user (Lấy từ PHP)
+        let currentBalance = {{ Auth::user()->balance }};
+        let checkInterval = null;
+
         function setAmount(value) {
             document.getElementById('depositAmount').value = value;
-            // Hiệu ứng focus nhẹ để user biết đã nhận
             const input = document.getElementById('depositAmount');
             input.classList.add('ring-2', 'ring-green-500');
             setTimeout(() => input.classList.remove('ring-2', 'ring-green-500'), 300);
         }
 
-        // Copy syntax helper
         function copySyntax() {
             const text = document.getElementById('syntaxText').innerText;
             navigator.clipboard.writeText(text).then(() => {
@@ -187,32 +200,78 @@
                 return;
             }
 
-            // CONFIG NGÂN HÀNG (Bro sửa STK ở đây và cả ở HTML phía trên nhé)
             const BANK_ID = 'MB'; 
             const ACCOUNT_NO = '0000716679906'; 
             const ACCOUNT_NAME = 'TRAN VAN CHIEN'; 
-            const CONTENT = 'ZT{{Auth::id()}}CKNH'; 
+            const CONTENT = 'ZT{{Auth::id()}}CKNH'; // Nội dung chuẩn
 
-            // API VietQR
             const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-print.png?amount=${amount}&addInfo=${CONTENT}&accountName=${encodeURIComponent(ACCOUNT_NAME)}`;
 
-            // UI Updates
             document.getElementById('qrPlaceholder').classList.add('hidden');
             const resultDiv = document.getElementById('qrResult');
             const img = document.getElementById('qrImage');
             
-            // Hiện loading giả 1 xíu cho mượt
             img.style.opacity = '0.5';
             img.src = qrUrl;
             
             img.onload = () => {
                 img.style.opacity = '1';
                 resultDiv.classList.remove('hidden');
-                // Scroll tới QR trên mobile
                 if(window.innerWidth < 1024) {
                     resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
+                
+                // --- BẮT ĐẦU CHECK TIỀN ---
+                startCheckingBalance();
             };
+        }
+
+        // --- HÀM KIỂM TRA SỐ DƯ (POLLING) ---
+        function startCheckingBalance() {
+            if (checkInterval) clearInterval(checkInterval); // Xóa interval cũ nếu có
+
+            console.log("Bắt đầu kiểm tra thanh toán...");
+            
+            // Cứ 3 giây gọi API 1 lần
+            checkInterval = setInterval(async () => {
+                try {
+                    // Gọi API lấy thông tin Profile mới nhất
+                    const res = await fetch('/tool/profile');
+                    const data = await res.json();
+
+                    if (data.status === 'success') {
+                        const newBalance = parseFloat(data.data.balance);
+                        
+                        // Nếu số dư mới lớn hơn số dư cũ -> Đã nạp thành công!
+                        if (newBalance > currentBalance) {
+                            clearInterval(checkInterval); // Dừng kiểm tra
+                            
+                            // Tính số tiền vừa nạp
+                            const addedAmount = newBalance - currentBalance;
+                            
+                            // Hiển thị thông báo
+                            showSuccessModal(addedAmount);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Lỗi kiểm tra số dư:", e);
+                }
+            }, 3000); // 3000ms = 3 giây
+        }
+
+        function showSuccessModal(amount) {
+            const modal = document.getElementById('successModal');
+            const amountText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+            
+            document.getElementById('receivedAmount').innerText = amountText;
+            
+            modal.classList.remove('hidden');
+            // Animation hiện modal
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('div').classList.remove('scale-95');
+                modal.querySelector('div').classList.add('scale-100');
+            }, 10);
         }
     </script>
 </x-app-layout>

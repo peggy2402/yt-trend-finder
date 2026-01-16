@@ -3,9 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-// 1. Import 2 thư viện này
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
+// [QUAN TRỌNG] Phải có dòng này mới dùng được URL::forceScheme
+use Illuminate\Support\Facades\URL; 
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,11 +23,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // 2. Thêm đoạn code Custom Email này vào hàm boot()
+        // Ép buộc dùng HTTPS trên môi trường Production (Render)
+        if($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
+
+        // Custom Email Verify
         VerifyEmail::toMailUsing(function (object $notifiable, string $url) {
             return (new MailMessage)
-                ->subject('Kích hoạt tài khoản | ZENTRA Group') // Tiêu đề email
-                ->view('emails.verify', ['url' => $url, 'user' => $notifiable]); // Trỏ đến file view vừa tạo
+                ->subject('Kích hoạt tài khoản | ZENTRA Group')
+                ->view('emails.verify', ['url' => $url, 'user' => $notifiable]);
         });
     }
 }
