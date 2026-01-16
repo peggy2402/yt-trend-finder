@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\TheGioiViaService;
+use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
 
 class ViaController extends Controller
 {
@@ -17,30 +20,47 @@ class ViaController extends Controller
         $this->apiService = $apiService;
     }
 
+    /**
+     * Lấy thông tin Profile (Số dư của User trên web mình)
+     */
     public function profile()
     {
-        $apiKey = env('THEGIOIVIA_API_KEY');
-
-        $response = Http::get("https://thegioivia.com/api/profile.php", [
-            'api_key' => $apiKey
+        $user = Auth::user();
+        
+        // Trả về số dư thực tế trong DB của web bạn
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'username' => $user->name,
+                'email' => $user->email,
+                'balance' => $user->balance // Đây là số dư user nạp vào web bạn
+            ]
         ]);
-
-        return response()->json($response->json());
     }
 
-
+    /**
+     * Lấy danh sách sản phẩm từ API gốc về để hiển thị
+     */
     public function getProducts()
     {
         try {
-            // Tự động gọi: .../products.php?api_key=...
+            // Vẫn gọi API để lấy danh sách sản phẩm realtime
             $data = $this->apiService->get('products.php');
             
             $products = [];
+            // Tỉ lệ giá bán (Ví dụ: bán đắt hơn 20% so với giá gốc)
+            $markupPercentage = 1.2; 
+
             if (isset($data['categories'])) {
                 foreach ($data['categories'] as $cat) {
                     if (isset($cat['products'])) {
                         foreach ($cat['products'] as $prod) {
                             $prod['category_name'] = $cat['name'];
+                            
+                            // *** QUAN TRỌNG: Tăng giá bán ở đây để có lời ***
+                            // Giá hiển thị cho khách = Giá gốc * 1.2
+                            $prod['price'] = ceil($prod['price'] * $markupPercentage); 
+                            
                             $products[] = $prod;
                         }
                     }
@@ -54,68 +74,88 @@ class ViaController extends Controller
         }
     }
 
-    // Lấy chi tiết sản phẩm
-    public function getProductDetail($id)
-    {
-        try {
-            // Tự động gọi: .../product.php?api_key=...&product={id}
-            $data = $this->apiService->get('product.php', [
-                'product' => $id
-            ]);
-
-            return response()->json(['success' => true, 'data' => $data]);
-
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
-    }
-    // Lay chi tiết đơn hàng
-    public function getOrderDetail($orderId)
-    {
-        try {
-            // Tự động gọi: .../order.php?api_key=...&order={orderId}
-            $data = $this->apiService->get('order.php', [
-                'order' => $orderId
-            ]);
-
-            return response()->json(['success' => true, 'data' => $data]);
-
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
-    }
-
     /**
-     * Mua hàng (POST buy product)
-     * URL: /tool/buy
+     * Mua hàng (Xử lý trừ tiền ví nội bộ -> Gọi API mua)
      */
     public function buyProduct(Request $request)
     {
-        // Validate input đầu vào
         $request->validate([
-            'product_id' => 'required|numeric',
-            'amount' => 'required|numeric|min:1'
+            'product_id' => 'required',
+            'amount' => 'required|numeric|min:1',
+            'product_name' => 'nullable|string', 
+            'current_price' => 'required|numeric' // Giá bán cho khách
         ]);
 
+        $user = Auth::user();
+        $amount = (int)$request->input('amount');
+        $productId = $request->input('product_id');
+        $sellPrice = (float)$request->input('current_price'); // Giá bán (đã markup)
+        $totalCostForUser = $sellPrice * $amount;
+
+        // 1. Kiểm tra số dư nội bộ của khách
+        if ($user->balance < $totalCostForUser) {
+            return response()->json([
+                'status' => 'error',
+                'msg' => 'Số dư không đủ. Vui lòng nạp thêm tiền!'
+            ], 400);
+        }
+
+        DB::beginTransaction();
         try {
-            // Tự động gọi: POST .../buy_product?api_key=...
-            // Payload body: action, id, amount, coupon
+            // 2. Trừ tiền user trước (Lock để tránh race condition nếu cần, ở đây làm đơn giản)
+            $user->balance -= $totalCostForUser;
+            $user->save();
+
+            // 3. Gọi API bên thứ 3 để lấy hàng
+            // Lưu ý: Gọi API này sẽ trừ tiền thật trong tài khoản Đại lý của bạn
             $payload = [
                 'action' => 'buyProduct',
-                'id'     => $request->input('product_id'),
-                'amount' => $request->input('amount'),
+                'id'     => $productId,
+                'amount' => $amount,
             ];
+            
+            // API key nằm trong Service, khách không bao giờ biết
+            $apiResult = $this->apiService->post('buy_product', $payload);
 
-            if ($request->has('coupon')) {
-                $payload['coupon'] = $request->input('coupon');
+            // Kiểm tra kết quả trả về từ API
+            if (!isset($apiResult['data']) || !is_array($apiResult['data'])) {
+                 throw new \Exception($apiResult['msg'] ?? 'Lỗi không xác định từ nhà cung cấp');
             }
 
-            $result = $this->apiService->post('buy_product', $payload);
+            // 4. Lưu lịch sử đơn hàng vào DB
+            $orderContent = implode("\n", $apiResult['data']); // Nối các dòng account lại
+            
+            Order::create([
+                'user_id' => $user->id,
+                'trans_id' => $apiResult['trans_id'] ?? uniqid(),
+                'product_id' => $productId,
+                'product_name' => $request->input('product_name', 'Unknown Product'),
+                'quantity' => $amount,
+                'price' => $sellPrice, // Giá bán cho khách
+                'cost' => 0, // Giá gốc (nếu muốn lưu chính xác thì phải lấy từ API product detail, tạm thời để 0 hoặc lấy logic khác)
+                'total_price' => $totalCostForUser,
+                'data' => $orderContent,
+                'status' => 'success'
+            ]);
 
-            return response()->json(['success' => true, 'data' => $result]);
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'msg' => 'Mua hàng thành công!',
+                'data' => $apiResult['data'], // Trả hàng về cho khách
+                'new_balance' => $user->balance // Trả về số dư mới để update UI
+            ]);
 
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            DB::rollBack();
+            Log::error("Buy Error: " . $e->getMessage());
+
+            // Nếu lỗi là do API bên kia hết tiền hoặc hết hàng, tiền của user đã được hoàn lại nhờ rollback
+            return response()->json([
+                'status' => 'error',
+                'msg' => 'Giao dịch thất bại: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

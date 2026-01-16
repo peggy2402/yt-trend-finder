@@ -1,67 +1,70 @@
-:root {
-    --bg-body: #f3f4f6;
-    --bg-card: #ffffff;
-    --text-main: #1f2937;
-    --text-muted: #6b7280;
-    --border-color: #e5e7eb;
-    --primary: #2563eb;
-    --primary-hover: #1d4ed8;
-    --success: #10b981;
-    --danger: #ef4444;
-    --input-bg: #ffffff;
+body { font-family: 'Outfit', sans-serif; }
+
+/* 1. Custom Scrollbar (Thanh cuộn đẹp hơn) */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Class ẩn scrollbar nhưng vẫn cuộn được (cho container sản phẩm) */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* 2. CẢI THIỆN PRODUCT CARD (QUAN TRỌNG) */
+/* Target vào các thẻ div con trực tiếp của #productList */
+#productList > div {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Hiệu ứng mượt */
+    border: 1px solid #e2e8f0; /* Viền mặc định nhạt */
+    will-change: transform, box-shadow;
 }
 
-/* Dark Mode Variables */
-[data-theme="dark"] {
-    --bg-body: #111827;
-    --bg-card: #1f2937;
-    --text-main: #f9fafb;
-    --text-muted: #9ca3af;
-    --border-color: #374151;
-    --primary: #3b82f6;
-    --primary-hover: #60a5fa;
-    --input-bg: #374151;
+/* Khi Hover vào Card */
+#productList > div:hover {
+    transform: translateY(-4px); /* Nhấc nhẹ lên 4px */
+    border-color: #ef4444 !important; /* Viền chuyển Đỏ */
+    box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.15), 0 8px 10px -6px rgba(220, 38, 38, 0.1) !important; /* Bóng đỏ mờ */
+    z-index: 10;
 }
 
-* { box-sizing: border-box; transition: background-color 0.3s, color 0.3s; }
-body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; }
+/* Nút "Chọn" bên trong Card */
+#productList > div button {
+    transition: all 0.2s;
+    background-color: #f3f4f6; /* Xám nhạt */
+    color: #4b5563; /* Chữ xám đậm */
+}
+/* Khi Hover vào Card thì nút "Chọn" sáng lên */
+#productList > div:hover button {
+    background-color: #ef4444 !important;
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.4);
+}
 
-.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+/* 3. ĐỒNG BỘ MÀU THEME (FIX XANH -> ĐỎ) */
+/* Override class của JS: Khi sản phẩm được chọn (đang là border-blue-500) */
+#productList > div.border-blue-500 {
+    border-color: #dc2626 !important; /* Đỏ đậm */
+    background-color: #fef2f2 !important; /* Nền đỏ rất nhạt */
+    ring: 2px solid #fecaca !important; /* Ring đỏ nhạt */
+    transform: scale(1.02); /* Phóng to nhẹ */
+}
+/* Override ring-blue-100 */
+#productList > div.ring-blue-100 {
+    --tw-ring-color: #fee2e2 !important;
+}
 
-/* Header */
-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-.logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
-.user-info { display: flex; gap: 15px; align-items: center; }
-.balance-badge { background: var(--bg-card); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--border-color); font-weight: bold; color: var(--success); }
-
-/* Buttons */
-.btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
-.btn-primary { background: var(--primary); color: white; }
-.btn-primary:hover { background: var(--primary-hover); }
-.btn-toggle { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); }
-
-/* Grid Layout */
-.dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-@media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } }
-
-/* Cards */
-.card { background: var(--bg-card); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 20px; }
-.card-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-
-/* Product List */
-.product-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
-.product-item:hover, .product-item.active { border-color: var(--primary); background-color: rgba(37, 99, 235, 0.05); }
-.prod-price { font-weight: bold; color: var(--danger); }
-.prod-stock { font-size: 0.9rem; color: var(--text-muted); }
-
-/* Form */
-.form-group { margin-bottom: 15px; }
-.form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; }
-.form-control { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); }
-.hidden { display: none; }
-
-/* Loading & Alerts */
-.loading-overlay { opacity: 0.5; pointer-events: none; }
-.alert { padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 0.9rem; }
-.alert-success { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid var(--success); }
-.alert-error { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
+/* 4. CẢI THIỆN DANH MỤC (SIDEBAR) */
+/* Item danh mục đang chọn (đang là bg-blue-50) */
+#categoryList > div.bg-blue-50 {
+    background-color: #fef2f2 !important; /* Red-50 */
+    color: #dc2626 !important; /* Red-600 */
+    border-left: 3px solid #dc2626;
+}
+/* Hover vào danh mục */
+#categoryList > div:hover:not(.bg-blue-50) {
+    background-color: #fff1f2 !important;
+    color: #ef4444 !important;
+    padding-left: 1rem; /* Hiệu ứng đẩy nhẹ sang phải */
+}
+#categoryList > div {
+    transition: all 0.2s ease;
+}

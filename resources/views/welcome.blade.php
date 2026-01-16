@@ -109,7 +109,7 @@
                     </div>
                 </div>
             </a>
-            <a href="{{ url('/shop') }}" class="group relative bg-[#131316] border border-slate-800 rounded-2xl p-1 overflow-hidden hover:border-red-500/50 transition-all duration-300 block">
+            <a href="{{ route('dashboard') }}" class="group relative bg-[#131316] border border-slate-800 rounded-2xl p-1 overflow-hidden hover:border-red-500/50 transition-all duration-300 block">
                 <div class="absolute inset-0 bg-gradient-to-b from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 
                 <div class="bg-[#18181b] rounded-xl p-6 h-full relative z-10 flex flex-col">

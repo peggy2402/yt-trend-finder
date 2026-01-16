@@ -2,8 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- STATE ---
     const state = {
         selectedProduct: null,
+        selectedCategory: null, // Thêm state danh mục đang chọn
         categories: [],
-        products: [] // Dùng để search nếu cần
+        products: [] 
     };
 
     // --- DOM ELEMENTS ---
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         balance: document.getElementById('userBalance'),
         username: document.getElementById('userName'),
         productList: document.getElementById('productList'),
+        categoryList: document.getElementById('categoryList'), // Sidebar danh mục
         buyForm: document.getElementById('buyForm'),
         productNameInput: document.getElementById('selectedProductName'),
         productIdInput: document.getElementById('selectedProductId'),
@@ -18,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
         totalPriceDisplay: document.getElementById('totalPrice'),
         resultArea: document.getElementById('resultArea'),
         btnBuy: document.getElementById('btnBuy'),
-        themeToggle: document.getElementById('themeToggle')
     };
 
     // --- HELPER ---
@@ -32,266 +33,324 @@ document.addEventListener('DOMContentLoaded', () => {
         return `https://flagcdn.com/24x18/${code.toLowerCase()}.png`;
     };
 
-    // --- THEME ---
-    function initTheme() {
-        const theme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', theme);
-        if(els.themeToggle) els.themeToggle.innerText = theme === 'light' ? '🌙 Dark' : '☀️ Light';
-    }
-    if(els.themeToggle) {
-        els.themeToggle.addEventListener('click', () => {
-            const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-            els.themeToggle.innerText = next === 'light' ? '🌙 Dark' : '☀️ Light';
-        });
-    }
-
-    // --- API HANDLER ---
-    async function fetchAPI(endpoint, method = 'GET', body = null) {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-        
-        const config = { 
-            method, 
-            headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': csrfToken 
-            } 
-        };
-        
-        if (body) config.body = JSON.stringify(body);
-        
+    // --- API CALLS ---
+    
+    // 1. Load Profile
+    async function loadProfile() {
         try {
-            const res = await fetch(`/api/${endpoint}`, config);
+            const res = await fetch('/tool/profile');
+            const result = await res.json();
             
-            if (!res.ok) {
-                let errorDetails = `Lỗi HTTP ${res.status}`;
-                try {
-                    const jsonError = await res.json();
-                    errorDetails = jsonError.message || jsonError.error || JSON.stringify(jsonError);
-                } catch (e) {
-                    // Ignore JSON parse error on error response
-                }
-                throw new Error(errorDetails);
+            if (result.status === 'success' && result.data) {
+                if(els.balance) els.balance.innerText = money(result.data.balance);
+                if(els.username) els.username.innerText = result.data.username || 'User';
             }
-
-            const text = await res.text();
-            if (!text || text.trim() === "") return null;
-
-            try {
-                return JSON.parse(text);
-            } catch (jsonError) {
-                console.error("Invalid JSON response");
-                return null;
-            }
-
-        } catch (err) {
-            console.error(`Fetch API [${endpoint}] Failed:`, err.message);
-            return null;
+        } catch (e) {
+            console.error('Lỗi tải thông tin user:', e);
         }
     }
 
-    // --- LOGIC ---
-    async function loadProfile() {
-        const res = await fetch('/api/profile');
-        const json = await res.json();
-
-        document.getElementById("userName").innerText = json.data.username;
-        document.getElementById("userBalance").innerText =
-            Number(json.data.money).toLocaleString() + "đ";
+    // 2. Load Products & Categories
+    async function loadProducts() {
+        // Hien thi loading
+        if (els.productList) els.productList.innerHTML = '<div class="text-center py-20 text-slate-400"><i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i><p>Đang tải dữ liệu...</p></div>';
+        
+        try {
+            const res = await fetch('/tool/products');
+            const result = await res.json();
+            
+            if (result.success && Array.isArray(result.data)) {
+                state.products = result.data;
+                
+                // --- UPDATE: RENDER CATEGORIES ---
+                renderCategories(state.products);
+                
+                // Render All Products Init
+                renderProducts(state.products);
+            } else {
+                if (els.productList) els.productList.innerHTML = '<div class="text-center text-red-500 py-10">Không tải được danh sách sản phẩm.</div>';
+            }
+        } catch (e) {
+            console.error(e);
+            if (els.productList) els.productList.innerHTML = '<div class="text-center text-red-500 py-10">Lỗi kết nối máy chủ.</div>';
+        }
     }
 
-    function renderSidebar(categories) {
-        const ul = document.getElementById("categoryList");
-        if (!ul) return;
+    // --- RENDER CATEGORIES (MỚI) ---
+    function renderCategories(products) {
+        if (!els.categoryList) return;
+        
+        // 1. Lọc ra danh sách tên danh mục duy nhất (Unique)
+        // Set giúp loại bỏ trùng lặp
+        const categories = [...new Set(products.map(p => p.category_name))].filter(Boolean);
+        
+        els.categoryList.innerHTML = '';
 
-        ul.innerHTML = "";
-        console.log("Rendering sidebar categories:", ul);
-        categories.forEach(cat => {
-            const li = document.createElement("li");
-            li.className = "cursor-pointer px-3 py-2 rounded hover:bg-blue-50 hover:text-blue-600 transition font-medium";
+        // Helper tạo item danh mục
+        const createCategoryItem = (name, isAll = false) => {
+            const li = document.createElement('li');
+            const isActive = isAll ? (state.selectedCategory === null) : (state.selectedCategory === name);
+            
+            // Tính số lượng sản phẩm trong danh mục (nếu không phải All)
+            const count = isAll ? products.length : products.filter(p => p.category_name === name).length;
+
             li.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <img src="${cat.icon}" class="w-5 h-5 object-contain" onerror="this.style.display='none'">
-                    <span>${cat.name}</span>
-                    <span class="ml-auto text-xs bg-gray-200 px-2 rounded">${cat.products.length}</span>
+                <div class="cursor-pointer px-3 py-2.5 rounded-lg text-sm font-medium transition-all flex justify-between items-center group
+                    ${isActive 
+                        ? 'bg-red-50 text-red-600 border-l-4 border-red-500 shadow-sm' 
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-red-500 hover:pl-4'}" 
+                    style="transition: all 0.2s ease">
+                    
+                    <span class="truncate">${name}</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full ${isActive ? 'bg-red-200 text-red-700' : 'bg-slate-100 text-slate-500 group-hover:bg-red-100 group-hover:text-red-600'}">
+                        ${count}
+                    </span>
                 </div>
             `;
+            
+            li.addEventListener('click', () => {
+                state.selectedCategory = isAll ? null : name;
+                
+                // Re-render danh mục để cập nhật trạng thái Active
+                renderCategories(state.products);
+                
+                // Lọc sản phẩm
+                if (state.selectedCategory) {
+                    const filtered = state.products.filter(p => p.category_name === state.selectedCategory);
+                    renderProducts(filtered);
+                } else {
+                    renderProducts(state.products);
+                }
+            });
+            
+            return li;
+        };
 
-            li.onclick = () => renderProductGrid(cat.products);
-            ul.appendChild(li);
+        // 2. Thêm nút "Tất cả"
+        els.categoryList.appendChild(createCategoryItem('Tất cả sản phẩm', true));
+
+        // 3. Thêm các danh mục từ API
+        categories.forEach(cat => {
+            els.categoryList.appendChild(createCategoryItem(cat));
         });
     }
 
-    document.addEventListener("DOMContentLoaded", loadProfile);
-    function renderProductGrid(products) {
-        els.productList.innerHTML = "";
-        products.forEach(p => els.productList.appendChild(createProductCard(p)));
-    }
+    // --- RENDER PRODUCTS ---
+    function renderProducts(products) {
+        if (!els.productList) return;
+        els.productList.innerHTML = '';
 
-    async function loadProducts() {
-        const res = await fetchAPI('products');
-
-        if (!res?.data || !Array.isArray(res.data)) {
-            els.productList.innerHTML = '<div class="text-red-500">Không lấy được sản phẩm</div>';
+        if (products.length === 0) {
+            els.productList.innerHTML = `
+                <div class="text-center py-10 flex flex-col items-center justify-center text-slate-400">
+                    <i class="fa-solid fa-box-open text-4xl mb-3 opacity-50"></i>
+                    <p>Không có sản phẩm nào trong mục này.</p>
+                </div>`;
             return;
         }
 
-        const categories = groupProductsByCategory(res.data);
-
-        state.categories = categories;
-        renderSidebar(categories);
-        renderProductGrid(categories[0].products);
-    }
-
-    function groupProductsByCategory(products) {
-        const map = {};
+        const grid = document.createElement('div');
+        // Sử dụng Grid cho đẹp
+        grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
 
         products.forEach(p => {
-            if (!map[p.category_name]) {
-                map[p.category_name] = {
-                    name: p.category_name,
-                    products: []
-                };
+            const card = document.createElement('div');
+            const isSoldOut = parseInt(p.amount) < 1;
+            const isSelected = state.selectedProduct?.id === p.id;
+            
+            // Style card
+            card.className = `
+                bg-white p-4 rounded-xl border transition-all duration-300 relative flex flex-col
+                ${isSelected ? 'border-red-500 ring-1 ring-red-500 shadow-md bg-red-50/30' : 'border-slate-200 hover:border-red-400 hover:shadow-lg hover:-translate-y-1'}
+                ${isSoldOut ? 'opacity-60 grayscale cursor-not-allowed' : 'cursor-pointer'}
+            `;
+            
+            // Flag image
+            let flagHtml = '';
+            if (p.country) {
+                const flag = getFlagUrl(p.country);
+                if (flag) flagHtml = `<img src="${flag}" class="w-5 h-auto rounded-sm shadow-sm" alt="${p.country}">`;
             }
-            map[p.category_name].products.push(p);
+
+            // Nội dung Card
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex items-center gap-2">
+                        ${flagHtml}
+                        <h3 class="font-bold text-slate-700 text-sm line-clamp-2 leading-tight min-h-[2.5em]">${p.name}</h3>
+                    </div>
+                    ${p.icon ? `<img src="${p.icon}" class="w-6 h-6 object-contain opacity-80">` : ''}
+                </div>
+                
+                <div class="mt-auto pt-3 border-t border-slate-100 flex justify-between items-end">
+                    <div>
+                        <div class="text-xs text-slate-500 mb-0.5">Hiện có: <span class="font-bold ${isSoldOut ? 'text-red-500' : 'text-green-600'}">${p.amount}</span></div>
+                        <div class="text-red-600 font-extrabold text-lg leading-none">${money(p.price)}</div>
+                    </div>
+                    <button class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${isSelected ? 'bg-red-600 text-white shadow-lg shadow-red-500/40' : 'bg-slate-100 text-slate-600 hover:bg-red-500 hover:text-white'}">
+                        ${isSelected ? '<i class="fa-solid fa-check"></i> Đã chọn' : 'Chọn'}
+                    </button>
+                </div>
+            `;
+
+            if (!isSoldOut) {
+                card.addEventListener('click', () => selectProduct(p));
+            }
+
+            grid.appendChild(card);
         });
 
-        return Object.values(map);
+        els.productList.appendChild(grid);
     }
 
-
-
-    // Render danh sách phẳng (cho trường hợp API khác)
-    function renderFlatList(products) {
-        els.productList.innerHTML = '';
-        products.forEach(p => {
-            els.productList.appendChild(createProductCard(p, p.category_name || 'Khác'));
-        });
-    }
-
-    function createProductCard(p) {
-        const div = document.createElement('div');
-
-        const stock = parseInt(p.amount);
-        const stockBadge = stock > 0 
-            ? `<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Còn ${stock}</span>`
-            : `<span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Hết hàng</span>`;
-
-        div.className = `
-            bg-white border rounded-xl p-4 shadow-sm
-            hover:shadow-lg hover:-translate-y-1 transition cursor-pointer
-            flex flex-col gap-2
-        `;
-
-        div.innerHTML = `
-            <div class="flex justify-between items-start gap-2">
-                <h4 class="font-bold text-sm line-clamp-2">${p.name}</h4>
-                ${p.flag ? `<img src="https://flagcdn.com/24x18/${p.flag.toLowerCase()}.png">` : ""}
-            </div>
-
-            <p class="text-xs text-gray-500 line-clamp-2">${p.description || ""}</p>
-
-            <div class="mt-auto flex justify-between items-center">
-                <span class="font-black text-blue-600">${money(p.price)}</span>
-                ${stockBadge}
-            </div>
-        `;
-
-        if (stock > 0) div.onclick = () => selectProduct(p, div);
-        else div.classList.add("opacity-60", "cursor-not-allowed");
-
-        return div;
-    }
-
-
-    function selectProduct(product, element) {
-        // Highlight UI
-        document.querySelectorAll('#productList > div > div').forEach(el => el.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50')); // Reset card style
-        // Note: Selector trên có thể cần điều chỉnh tùy DOM structure, nhưng logic classlist remove là quan trọng
-        
-        // Cách đơn giản hơn để reset active state:
-        const prevActive = document.querySelector('.product-card-active');
-        if(prevActive) prevActive.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50', 'product-card-active');
-        
-        element.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50', 'product-card-active');
-
+    function selectProduct(product) {
         state.selectedProduct = product;
         
-        if(els.productNameInput) els.productNameInput.value = product.name;
-        if(els.productIdInput) els.productIdInput.value = product.id;
-        if(els.amountInput) {
-            els.amountInput.value = 1;
-            els.amountInput.max = product.amount; 
-        }
+        // Update form
+        if (els.productNameInput) els.productNameInput.value = product.name;
+        if (els.productIdInput) els.productIdInput.value = product.id;
+        
+        // Reset amount
+        if (els.amountInput) els.amountInput.value = 1;
+        
+        // Re-render UI (để highlight card được chọn)
+        // Lọc lại theo category hiện tại để không bị nhảy list
+        const currentList = state.selectedCategory 
+            ? state.products.filter(p => p.category_name === state.selectedCategory)
+            : state.products;
+        renderProducts(currentList);
+        
         updateTotal();
 
-        if(window.innerWidth < 1024 && els.buyForm) { // Scroll trên mobile/tablet
+        // Mobile scroll
+        if(window.innerWidth < 1024 && els.buyForm) {
             els.buyForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }
 
     function updateTotal() {
-        if (!state.selectedProduct || !els.totalPriceDisplay) return;
-        const qty = parseInt(els.amountInput?.value) || 0;
-        const price = parseFloat(state.selectedProduct.price) || 0;
-        const total = qty * price;
-        els.totalPriceDisplay.innerText = money(total);
+        if (!state.selectedProduct) {
+            if (els.totalPriceDisplay) els.totalPriceDisplay.innerText = '0đ';
+            return;
+        }
+        
+        const amount = parseInt(els.amountInput?.value) || 0;
+        const total = amount * state.selectedProduct.price;
+        if (els.totalPriceDisplay) els.totalPriceDisplay.innerText = money(total);
+        
+        if (els.btnBuy) {
+            els.btnBuy.disabled = amount <= 0 || amount > state.selectedProduct.amount;
+            if(amount > state.selectedProduct.amount) {
+                alert(`Kho chỉ còn ${state.selectedProduct.amount} sản phẩm!`);
+                els.amountInput.value = state.selectedProduct.amount;
+                updateTotal();
+            }
+        }
     }
 
-    async function handleBuy() {
-        if (!state.selectedProduct) return alert('Vui lòng chọn sản phẩm cần mua!');
-        const qty = parseInt(els.amountInput?.value);
-        if(!qty || qty < 1 || qty > parseInt(state.selectedProduct.amount)) return alert('Số lượng không hợp lệ!');
+    // --- BUY ACTION ---
+    if (els.btnBuy) {
+        els.btnBuy.addEventListener('click', async () => {
+            if (!state.selectedProduct) {
+                alert('Vui lòng chọn sản phẩm trước!');
+                return;
+            }
 
-        if(els.btnBuy) {
+            const amount = els.amountInput.value;
+            const confirmMsg = `Xác nhận mua ${amount} ${state.selectedProduct.name}?\nTổng tiền: ${els.totalPriceDisplay.innerText}`;
+            
+            if (!confirm(confirmMsg)) return;
+
+            // UI Loading
             els.btnBuy.disabled = true;
-            els.btnBuy.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang xử lý...';
-        }
-        if(els.resultArea) els.resultArea.className = 'hidden';
+            const originalBtnText = els.btnBuy.innerHTML;
+            els.btnBuy.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+            if (els.resultArea) els.resultArea.classList.add('hidden');
 
-        const result = await fetchAPI('buy', 'POST', {
-            product_id: state.selectedProduct.id, 
-            amount: qty,
-            coupon: document.getElementById('coupon')?.value || ''
-        });
-
-        if(els.btnBuy) {
-            els.btnBuy.disabled = false;
-            els.btnBuy.innerText = 'MUA NGAY';
-        }
-
-        if (result && result.success) { 
-            if(els.resultArea) {
-                els.resultArea.className = 'alert alert-success mt-4 p-4 bg-green-50 text-green-700 border border-green-200 rounded-lg block';
-                const apiData = result.data || {};
-                const accounts = Array.isArray(apiData.data) ? apiData.data.join('\n') : JSON.stringify(apiData.data || apiData);
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 
-                els.resultArea.innerHTML = `
-                    <div class="font-bold mb-2">✅ ${apiData.msg || 'Mua hàng thành công!'}</div>
-                    <textarea class="w-full p-2 text-xs font-mono bg-white border rounded h-32 focus:outline-none" readonly>${accounts}</textarea>
-                    <div class="text-xs mt-1 text-gray-500">Giao dịch thành công.</div>
-                `;
+                const res = await fetch('/tool/buy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        product_id: state.selectedProduct.id,
+                        amount: amount,
+                        product_name: state.selectedProduct.name,
+                        current_price: state.selectedProduct.price
+                    })
+                });
+
+                const result = await res.json();
+
+                if (res.ok && (result.status === 'success' || result.success)) {
+                    showSuccess(result);
+                    loadProfile(); // Cập nhật tiền
+                    loadProducts(); // Cập nhật kho
+                } else {
+                    showError(result);
+                }
+
+            } catch (e) {
+                console.error(e);
+                showError({ msg: 'Lỗi hệ thống. Vui lòng thử lại.' });
+            } finally {
+                els.btnBuy.disabled = false;
+                els.btnBuy.innerHTML = originalBtnText;
             }
-            loadProfile();
-            loadProducts();
-        } else {
-            if(els.resultArea) {
-                els.resultArea.className = 'alert alert-error mt-4 p-4 bg-red-50 text-red-700 border border-red-200 rounded-lg block';
-                els.resultArea.innerText = `❌ ${result?.message || result?.msg || 'Giao dịch thất bại. Vui lòng thử lại sau.'}`;
-            }
-        }
+        });
     }
 
-    // --- LISTENERS ---
-    if(els.amountInput) els.amountInput.addEventListener('input', updateTotal);
-    if(els.btnBuy) els.btnBuy.addEventListener('click', handleBuy);
-
-    // --- BOOTSTRAP ---
-    initTheme();
-    if(els.productList) {
-        loadProfile();
-        loadProducts();
+    function showSuccess(result) {
+        if (!els.resultArea) return;
+        els.resultArea.classList.remove('hidden');
+        els.resultArea.className = 'mt-4 animate-fade-in-up';
+        
+        const apiData = result.data || {};
+        // Data trả về có thể là array hoặc object tùy API
+        const dataContent = Array.isArray(apiData) ? apiData : (apiData.data || apiData);
+        const accounts = Array.isArray(dataContent) ? dataContent.join('\n') : JSON.stringify(dataContent);
+        
+        els.resultArea.innerHTML = `
+            <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+                <div class="flex items-center gap-2 text-green-700 font-bold mb-2">
+                    <i class="fa-solid fa-circle-check"></i> ${result.msg || 'Giao dịch thành công!'}
+                </div>
+                <div class="relative">
+                    <textarea class="w-full h-32 p-3 text-xs font-mono bg-white border border-green-200 rounded-lg focus:outline-none resize-none text-slate-700" readonly>${accounts}</textarea>
+                    <button onclick="navigator.clipboard.writeText(this.previousElementSibling.value); this.innerHTML='<i class=\\'fa-solid fa-check\\'></i> Đã Copy';" class="absolute top-2 right-2 bg-green-100 hover:bg-green-200 text-green-700 text-xs px-2 py-1 rounded transition">
+                        <i class="fa-regular fa-copy"></i> Copy
+                    </button>
+                </div>
+                <div class="mt-2 text-xs text-green-600">
+                    * Vui lòng lưu lại dữ liệu này ngay.
+                </div>
+            </div>
+        `;
     }
+
+    function showError(result) {
+        if (!els.resultArea) return;
+        els.resultArea.classList.remove('hidden');
+        els.resultArea.className = 'mt-4 animate-fade-in-up';
+        
+        els.resultArea.innerHTML = `
+            <div class="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+                <i class="fa-solid fa-circle-exclamation text-red-600 mt-0.5"></i>
+                <div>
+                    <div class="text-red-700 font-bold text-sm">Giao dịch thất bại</div>
+                    <div class="text-red-600 text-xs mt-1">${result.msg || result.message || 'Lỗi không xác định.'}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    // --- INIT ---
+    loadProfile();
+    loadProducts();
+    
+    if (els.amountInput) els.amountInput.addEventListener('input', updateTotal);
 });
