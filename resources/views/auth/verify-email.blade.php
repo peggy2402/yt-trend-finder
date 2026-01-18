@@ -3,62 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xác thực Email | ZENTRA Group</title>
+    <title>Xác thực OTP | ZENTRA Group</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Outfit', sans-serif; }
         .glass-panel {
-            background: rgba(24, 24, 27, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(20, 20, 23, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
+        /* Ẩn nút tăng giảm input number */
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        
+        /* Hiệu ứng mờ cho nút gửi lại khi chưa kích hoạt */
+        .disabled-link { pointer-events: none; opacity: 0.5; }
     </style>
 </head>
-<body class="bg-[#0a0a0c] text-white min-h-screen flex items-center justify-center relative overflow-hidden">
-    
+<body class="bg-[#050505] text-white min-h-screen flex items-center justify-center relative overflow-hidden">
+
     <div class="fixed inset-0 pointer-events-none">
-        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-red-600/10 rounded-full blur-[150px]"></div>
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
     </div>
 
-    <div class="relative z-10 w-full max-w-md px-4">
-        <div class="glass-panel p-8 rounded-2xl shadow-2xl text-center">
+    <div class="relative z-10 w-full max-w-md px-6">
+        <div class="glass-panel p-8 rounded-3xl text-center">
             
-            <div class="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500 text-3xl animate-bounce">
-                <i class="fa-solid fa-envelope-circle-check"></i>
+            <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500 text-2xl border border-red-500/20">
+                <i class="fa-solid fa-shield-cat"></i>
             </div>
 
-            <h2 class="text-2xl font-bold mb-4">Kiểm tra email của bạn</h2>
-            
-            <div class="text-slate-400 text-sm mb-6 leading-relaxed">
-                Cảm ơn bạn đã đăng ký! Trước khi bắt đầu, vui lòng xác thực tài khoản bằng cách nhấn vào liên kết chúng tôi vừa gửi đến email của bạn.
-                <br><br>
-                <span class="text-slate-500 text-xs italic">(Nếu không thấy email, hãy kiểm tra mục Spam nhé)</span>
-            </div>
+            <h2 class="text-2xl font-bold mb-2">Xác thực bảo mật</h2>
+            <p class="text-slate-400 text-sm mb-6 px-4">
+                Mã OTP đã gửi đến: <span class="text-white font-medium">{{ request('email') }}</span>
+            </p>
 
-            @if (session('status') == 'verification-link-sent')
-                <div class="mb-6 font-medium text-sm text-green-400 bg-green-400/10 p-3 rounded-lg border border-green-400/20">
-                    Một liên kết xác thực mới đã được gửi đến địa chỉ email của bạn.
+            @if ($errors->any())
+                <div class="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+                    {{ $errors->first() }}
                 </div>
             @endif
 
-            <div class="flex flex-col gap-3">
-                <form method="POST" action="{{ route('verification.send') }}">
-                    @csrf
-                    <button type="submit" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl shadow-lg transition-all">
-                        Gửi lại email xác thực
-                    </button>
-                </form>
+            @if (session('status'))
+                <div class="mb-6 p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-400 text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-check-circle"></i> {{ session('status') }}
+                </div>
+            @endif
 
-                <form method="POST" action="{{ route('logout') }}">
+            <form method="POST" action="{{ route('otp.store') }}">
+                @csrf
+                <input type="hidden" name="email" value="{{ Auth::user() ? Auth::user()->email : request('email') }}">
+
+                <div class="mb-6">
+                    <input type="text" name="otp" maxlength="6" autofocus required
+                        class="w-full bg-[#0a0a0c] border border-slate-700 rounded-xl py-4 text-center text-3xl tracking-[10px] font-bold text-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder-slate-700"
+                        placeholder="000000">
+                </div>
+
+                <button type="submit" class="w-full bg-white text-black font-bold py-3.5 rounded-xl hover:bg-slate-200 transition-colors mb-6 shadow-lg shadow-white/10">
+                    Xác nhận OTP
+                </button>
+            </form>
+
+            <div class="text-sm text-slate-500">
+                <span id="countdown-wrapper">
+                    Mã hết hạn sau <span id="countdown" class="text-red-500 font-bold">60</span> giây.
+                </span>
+
+                <form id="resend-form" method="POST" action="{{ route('otp.resend') }}" class="hidden mt-2">
                     @csrf
-                    <button type="submit" class="w-full bg-transparent hover:bg-white/5 text-slate-400 font-medium py-3 rounded-xl border border-slate-700 transition-all">
-                        Đăng xuất
+                    <input type="hidden" name="email" value="{{ Auth::user() ? Auth::user()->email : request('email') }}">
+                    <p class="mb-2">Bạn chưa nhận được mã?</p>
+                    <button type="submit" class="text-white underline decoration-red-500 underline-offset-4 hover:text-red-500 transition-colors font-semibold">
+                        Gửi lại mã mới
                     </button>
                 </form>
             </div>
+
         </div>
     </div>
+
+    <script>
+        // Lấy thời gian còn lại thực tế từ Server
+        let timeLeft = {{ $remainingSeconds }}; 
+        
+        const countdownEl = document.getElementById('countdown');
+        const countdownWrapper = document.getElementById('countdown-wrapper');
+        const resendForm = document.getElementById('resend-form');
+
+        // Hàm update UI
+        function updateUI() {
+            if (timeLeft <= 0) {
+                // Hết giờ: Ẩn đếm ngược, hiện nút gửi lại
+                countdownWrapper.classList.add('hidden');
+                resendForm.classList.remove('hidden');
+            } else {
+                // Còn giờ: Hiện đếm ngược, ẩn nút gửi lại
+                countdownWrapper.classList.remove('hidden');
+                resendForm.classList.add('hidden');
+                countdownEl.innerText = timeLeft;
+            }
+        }
+
+        // Chạy ngay lần đầu để set trạng thái đúng (trường hợp load lại trang mà đã hết hạn)
+        updateUI();
+
+        const timer = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                updateUI();
+            } else {
+                timeLeft -= 1;
+                countdownEl.innerText = timeLeft;
+            }
+        }, 1000);
+    </script>
 </body>
 </html>

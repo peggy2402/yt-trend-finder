@@ -4,128 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng ký | ZENTRA Group</title>
-    
-    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <style>
         body { font-family: 'Outfit', sans-serif; }
         .glass-panel {
-            background: rgba(24, 24, 27, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(20, 20, 23, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
+        .input-group:focus-within i { color: #ef4444; }
+        .input-group:focus-within input { border-color: #ef4444; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1); }
     </style>
 </head>
-<body class="bg-[#0a0a0c] text-white min-h-screen flex items-center justify-center relative overflow-hidden selection:bg-red-500 selection:text-white py-10">
+<body class="bg-[#050505] text-white min-h-screen flex items-center justify-center relative overflow-hidden">
 
-    <!-- Background Effects -->
     <div class="fixed inset-0 pointer-events-none">
-        <div class="absolute top-[10%] right-[10%] w-[50vw] h-[50vw] bg-purple-600/10 rounded-full blur-[120px]"></div>
-        <div class="absolute bottom-[10%] left-[10%] w-[50vw] h-[50vw] bg-red-600/10 rounded-full blur-[120px]"></div>
-        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-[128px]"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-[128px]"></div>
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
     </div>
 
-    <!-- Login Container -->
-    <div class="relative z-10 w-full max-w-md px-4">
+    <div class="relative z-10 w-full max-w-[420px] px-6">
         
-        <!-- Logo -->
-        <div class="text-center mb-8">
-            <a href="{{ url('/') }}" class="inline-flex items-center gap-3 group">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-12 h-12 group-hover:scale-110 transition-transform duration-500">
-                <span class="text-3xl font-extrabold tracking-tight">ZENTRA<span class="text-red-500"> GROUP</span></span>
+        <div class="text-center mb-10">
+            <a href="/" class="inline-block mb-4">
+                <img src="{{ asset('images/logo.png') }}" alt="ZENTRA" class="w-16 h-16 mx-auto drop-shadow-2xl">
             </a>
-            <p class="text-slate-400 mt-2 text-sm">Tạo tài khoản để truy cập hệ sinh thái.</p>
+            <h1 class="text-3xl font-bold tracking-tight">Tạo tài khoản mới</h1>
+            <p class="text-slate-500 mt-2 text-sm">Tham gia hệ sinh thái ZENTRA Group ngay hôm nay.</p>
         </div>
 
-        <!-- Form Card -->
-        <div class="glass-panel p-8 rounded-2xl shadow-2xl shadow-black/50">
-
-            <!-- Validation Errors -->
+        <div class="glass-panel p-8 rounded-3xl">
+            
             @if ($errors->any())
-                <div class="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-                    <div class="font-bold mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Vui lòng kiểm tra lại:</div>
-                    <ul class="list-disc list-inside">
+                <div class="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex gap-3 items-start">
+                    <i class="fa-solid fa-circle-exclamation text-red-500 mt-0.5"></i>
+                    <div class="text-sm text-red-400">
                         @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
+                            <p>{{ $error }}</p>
                         @endforeach
-                    </ul>
+                    </div>
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('register') }}">
+            <form method="POST" action="{{ route('register') }}" class="space-y-5">
                 @csrf
 
-                <!-- Name -->
-                <div class="mb-5">
-                    <label for="name" class="block text-sm font-medium text-slate-300 mb-2">Họ và Tên</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-3.5 text-slate-500"><i class="fa-regular fa-user"></i></span>
-                        <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus
-                            class="w-full bg-[#131316] border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-600 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all"
-                            placeholder="Nguyễn Văn A">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-slate-400 ml-1">HỌ VÀ TÊN</label>
+                    <div class="relative input-group transition-all duration-300">
+                        <span class="absolute left-4 top-3.5 text-slate-600 transition-colors duration-300"><i class="fa-regular fa-user"></i></span>
+                        <input type="text" name="name" value="{{ old('name') }}" required autofocus
+                            class="w-full bg-[#0a0a0c] border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-white placeholder-slate-700 outline-none transition-all duration-300"
+                            placeholder="Nhập tên hiển thị">
                     </div>
                 </div>
 
-                <!-- Email Address -->
-                <div class="mb-5">
-                    <label for="email" class="block text-sm font-medium text-slate-300 mb-2">Email</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-3.5 text-slate-500"><i class="fa-regular fa-envelope"></i></span>
-                        <input id="email" type="email" name="email" value="{{ old('email') }}" required
-                            class="w-full bg-[#131316] border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-600 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all"
-                            placeholder="name@example.com">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-slate-400 ml-1">EMAIL</label>
+                    <div class="relative input-group transition-all duration-300">
+                        <span class="absolute left-4 top-3.5 text-slate-600 transition-colors duration-300"><i class="fa-regular fa-envelope"></i></span>
+                        <input type="email" name="email" value="{{ old('email') }}" required
+                            class="w-full bg-[#0a0a0c] border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-white placeholder-slate-700 outline-none transition-all duration-300"
+                            placeholder="email@domain.com">
                     </div>
                 </div>
 
-                <!-- Password -->
-                <div class="mb-5">
-                    <label for="password" class="block text-sm font-medium text-slate-300 mb-2">Mật khẩu</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-3.5 text-slate-500"><i class="fa-solid fa-lock"></i></span>
-                        <input id="password" type="password" name="password" required autocomplete="new-password"
-                            class="w-full bg-[#131316] border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-600 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all"
-                            placeholder="••••••••">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-slate-400 ml-1">MẬT KHẨU</label>
+                    <div class="relative input-group transition-all duration-300">
+                        <span class="absolute left-4 top-3.5 text-slate-600 transition-colors duration-300"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" name="password" required
+                            class="w-full bg-[#0a0a0c] border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-white placeholder-slate-700 outline-none transition-all duration-300"
+                            placeholder="Tối thiểu 8 ký tự">
                     </div>
                 </div>
 
-                <!-- Confirm Password -->
-                <div class="mb-6">
-                    <label for="password_confirmation" class="block text-sm font-medium text-slate-300 mb-2">Nhập lại mật khẩu</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-3.5 text-slate-500"><i class="fa-solid fa-shield-halved"></i></span>
-                        <input id="password_confirmation" type="password" name="password_confirmation" required
-                            class="w-full bg-[#131316] border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-600 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all"
-                            placeholder="••••••••">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-slate-400 ml-1">XÁC NHẬN MẬT KHẨU</label>
+                    <div class="relative input-group transition-all duration-300">
+                        <span class="absolute left-4 top-3.5 text-slate-600 transition-colors duration-300"><i class="fa-solid fa-shield-halved"></i></span>
+                        <input type="password" name="password_confirmation" required
+                            class="w-full bg-[#0a0a0c] border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-white placeholder-slate-700 outline-none transition-all duration-300"
+                            placeholder="Nhập lại mật khẩu">
                     </div>
                 </div>
 
-                <!-- Submit Button -->
-                <button type="submit" class="w-full bg-white text-black hover:bg-slate-200 font-bold py-3.5 rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 active:scale-95">
-                    Đăng ký tài khoản <i class="fa-solid fa-user-plus ml-2"></i>
+                <button type="submit" class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-red-900/20 transition-all transform hover:-translate-y-1 mt-2">
+                    Đăng Ký Tài Khoản
                 </button>
             </form>
 
-            <!-- Divider -->
-            <div class="mt-8 relative flex items-center justify-center">
-                <div class="absolute inset-x-0 top-1/2 h-px bg-slate-800"></div>
-                <span class="relative z-10 bg-[#141417] px-4 text-xs text-slate-500 uppercase tracking-widest font-bold">hoặc</span>
-            </div>
-
-            <!-- Login Link -->
-            <div class="mt-6 text-center">
-                <p class="text-slate-400 text-sm">
-                    Đã có tài khoản? 
-                    <a href="{{ route('login') }}" class="text-red-500 font-bold hover:text-red-400 transition-colors">Đăng nhập</a>
-                </p>
+            <div class="mt-8 text-center text-sm text-slate-400">
+                Đã có tài khoản? <a href="{{ route('login') }}" class="text-white font-semibold hover:text-red-500 transition-colors">Đăng nhập ngay</a>
             </div>
         </div>
     </div>
-
 </body>
 </html>

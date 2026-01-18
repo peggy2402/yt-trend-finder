@@ -24,10 +24,22 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        $request->authenticate(); // Laravel mặc định check email/pass
+
+        $user = $request->user();
+
+        // KIỂM TRA LOGIC VERIFY
+        if (!$user->hasVerifiedEmail()) {
+            // Đăng xuất ngay lập tức để không tạo session
+            Auth::guard('web')->logout(); 
+            
+            // Kiểm tra xem OTP còn hạn không, nếu hết hạn thì tự gửi lại luôn cho tiện (Optional)
+            // Hoặc chỉ đơn giản là redirect về trang nhập
+            return redirect()->route('otp.verify', ['email' => $user->email])
+                            ->withErrors(['email' => 'Tài khoản chưa được kích hoạt. Vui lòng nhập mã OTP.']);
+        }
 
         $request->session()->regenerate();
-
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Mail\SendOtpMail;
+use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 
 class ProfileController extends Controller
 {
@@ -26,13 +29,23 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+            
+            // --- LOGIC MỚI: Tự động tạo và gửi OTP cho email mới ---
+            $otp = rand(100000, 999999);
+            $user->otp_code = $otp;
+            $user->otp_expires_at = Carbon::now()->addSeconds(60);
+            
+            // Gửi mail đến địa chỉ email MỚI
+            Mail::to($user->email)->send(new SendOtpMail($user, $otp));
+            // -------------------------------------------------------
         }
 
-        $request->user()->save();
+        $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

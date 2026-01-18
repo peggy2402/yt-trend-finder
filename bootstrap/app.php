@@ -25,7 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Tắt CSRF cho Webhook để SePay bắn tin được
         $middleware->validateCsrfTokens(except: [
             'api/sepay/webhook', 
-            'api/*' // Hoặc mở hết cho API
+            'api/*', // Hoặc mở hết cho API
         ]);
 
         // Trust Proxy cho Render (để không bị lỗi HTTPS)

@@ -64,21 +64,11 @@
                             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
                                     <td align="center">
-                                        <a href="{{ $url }}" style="background-color: #dc2626; color: #ffffff; padding: 16px 36px; display: inline-block; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4); text-transform: uppercase; letter-spacing: 1px;">
-                                            Xác thực tài khoản
-                                        </a>
+                                        <p>Mã xác thực (OTP) của bạn là: <strong style="font-size: 24px; color: #ef4444;">{{ $otp }}</strong></p>
                                     </td>
+                                    <p>Mã này sẽ hết hạn sau 60 giây.</p>
                                 </tr>
                             </table>
-
-                            <!-- Fallback Link -->
-                            <p style="color: #52525b; font-size: 13px; line-height: 20px; margin: 40px 0 0 0; text-align: center; border-top: 1px solid #27272a; padding-top: 20px;">
-                                Nếu nút bấm trên không hoạt động, hãy copy đường dẫn này:<br>
-                                <a href="{{ $url }}" style="color: #ef4444; text-decoration: none; word-break: break-all;">
-                                    {{ $url }}
-                                </a>
-                            </p>
-
                         </td>
                     </tr>
 
