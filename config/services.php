@@ -39,5 +39,8 @@ return [
         'base_url' => env('THEGIOIVIA_URL'),
         'api_key' => env('THEGIOIVIA_API_KEY'),
     ],
-
+    
+    'sendgrid' => [
+        'api_key' => env('SENDGRID_API_KEY'),
+    ],
 ];
