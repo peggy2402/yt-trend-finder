@@ -10,6 +10,9 @@ use App\Mail\SendOtpMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session; // Import Session
+use Illuminate\Support\Facades\Password; // Import Password Facade
+
 class OtpController extends Controller
 {
     // Hiển thị form nhập OTP
@@ -17,21 +20,24 @@ class OtpController extends Controller
     {
         $email = $request->query('email');
         $user = User::where('email', $email)->first();
-        // Nếu không tìm thấy user hoặc user đã verify rồi -> đá về trang phù hợp
+        
         if (!$user) {
             return redirect()->route('register');
         }
-        if ($user->hasVerifiedEmail()) {
+
+        // Lấy mục đích từ session
+        $intent = Session::get('otp_intent');
+
+        // Chỉ redirect về login nếu user đã verify VÀ KHÔNG PHẢI đang reset password
+        if ($user->hasVerifiedEmail() && $intent !== 'reset_password') {
             return redirect()->route('login');
         }
 
         // TÍNH TOÁN THỜI GIAN CÒN LẠI (Giây)
-        // Nếu expires_at null hoặc đã qua giờ hiện tại thì còn lại 0 giây
         $remainingSeconds = 0;
         if ($user->otp_expires_at) {
             $remainingSeconds = (int) \Carbon\Carbon::now()->diffInSeconds($user->otp_expires_at, false);
         }
-        // Nếu số âm (đã hết hạn), gán về 0
         if ($remainingSeconds < 0) {
             $remainingSeconds = 0;
         }
@@ -41,17 +47,15 @@ class OtpController extends Controller
     // Xử lý xác thực OTP
     public function store(Request $request)
     {
-        // 1. Nếu User đang đăng nhập, lấy email của họ luôn (tránh hacker sửa input hidden)
         $email = $request->user() ? $request->user()->email : $request->email;
-        $request->merge(['email' => $email]); // Gộp lại vào request để validate
+        $request->merge(['email' => $email]); 
         $request->validate([
             'email' => 'required|email|exists:users,email',
             'otp' => 'required|numeric|digits:6',
         ]);
 
-        // RATE LIMITING (Sử dụng cache để đếm số lần sai theo IP và Email)
         $throttleKey = 'otp-try:'.$request->ip().':'.$request->email;
-        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($throttleKey, 5)) {
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             return back()->withErrors(['otp' => 'Bạn đã nhập sai quá nhiều lần. Vui lòng thử lại sau 15 phút.']);
         }
         
@@ -59,27 +63,43 @@ class OtpController extends Controller
 
         // Logic kiểm tra OTP
         if (!$user || $user->otp_code !== $request->otp) {
-            \Illuminate\Support\Facades\RateLimiter::hit($throttleKey, 900); // Ghi nhận lỗi
+            RateLimiter::hit($throttleKey, 900); 
             return back()->withErrors(['otp' => 'Mã OTP không chính xác.']);
         }
 
-        // Kiểm tra thời gian hết hạn
         if (Carbon::now()->greaterThan($user->otp_expires_at)) {
             return back()->withErrors(['otp' => 'Mã OTP đã hết hạn. Vui lòng đăng ký lại hoặc yêu cầu mã mới.']);
         }
-        \Illuminate\Support\Facades\RateLimiter::clear($throttleKey);
-        // Xác thực thành công
+        RateLimiter::clear($throttleKey);
+        
+        // Xác thực thành công (Clear OTP)
         $user->email_verified_at = Carbon::now();
-        $user->otp_code = null;      // Xóa OTP sau khi dùng
+        $user->otp_code = null;      
         $user->otp_expires_at = null;
         $user->save();
 
-        // LOGIC ĐIỀU HƯỚNG MỚI
+        // --- LOGIC ĐIỀU HƯỚNG MỚI (CẬP NHẬT) ---
+        $intent = Session::get('otp_intent');
+
+        // Case 1: Quên mật khẩu -> Chuyển sang form đặt mật khẩu mới
+        if ($intent === 'reset_password') {
+            // Tạo token reset password hợp lệ của Laravel
+            $token = Password::createToken($user);
+            
+            // Xóa session intent để tránh lỗi lần sau
+            Session::forget('otp_intent');
+
+            // Chuyển hướng sang route 'password.reset' với token và email
+            return redirect()->route('password.reset', ['token' => $token, 'email' => $email]);
+        }
+
+        // Case 2: Đang đăng nhập (Đổi email/profile)
         if (Auth::check()) {
-            // Case 1: Đổi Profile -> Quay lại trang Profile kèm thông báo
             return redirect()->route('profile.edit')->with('status', 'profile-updated');
-        } else {
-            // Case 2: Đăng ký mới -> Chuyển sang Login
+        } 
+        
+        // Case 3: Đăng ký mới (Mặc định)
+        else {
             return redirect()->route('login')->with('status', 'Tài khoản đã kích hoạt! Vui lòng đăng nhập.');
         }
     }
@@ -88,19 +108,12 @@ class OtpController extends Controller
     public function resend(Request $request)
     {
         $email = $request->user() ? $request->user()->email : $request->email;
-        // Validate thủ công vì ta đã thay đổi nguồn email
         if (!$email) {
             return back()->withErrors(['email' => 'Không tìm thấy địa chỉ email.']);
         }
 
-        // $request->validate([
-        //     'email' => 'required|email|exists:users,email',
-        // ]);
-
         $user = User::where('email', $email)->first();
 
-        // Kiểm tra nếu người dùng spam nút gửi lại (ví dụ: bắt đợi 60s mới được gửi lại lần nữa)
-        // Logic này tùy chọn, nhưng nên có để tránh spam mail
         if ($user->otp_expires_at && Carbon::now()->lt($user->otp_expires_at)) {
             return back()->withErrors(['otp' => 'Vui lòng đợi đồng hồ đếm ngược kết thúc trước khi gửi lại.']);
         }
@@ -108,13 +121,12 @@ class OtpController extends Controller
         // 1. Tạo OTP mới
         $otp = rand(100000, 999999);
         $user->otp_code = $otp;
-        $user->otp_expires_at = Carbon::now()->addSeconds(60); // Gia hạn thêm 60s
+        $user->otp_expires_at = Carbon::now()->addSeconds(60); 
         $user->save();
 
         // 2. Gửi Email
         Mail::to($user->email)->send(new SendOtpMail($user, $otp));
 
-        // 3. Trả về thông báo thành công
         return back()->with('status', 'Mã OTP mới đã được gửi vào email của bạn!');
     }
 }

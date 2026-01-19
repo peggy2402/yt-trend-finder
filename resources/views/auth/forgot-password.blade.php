@@ -40,7 +40,7 @@
                 </div>
                 <h2 class="text-xl font-bold">Khôi phục mật khẩu</h2>
                 <p class="text-slate-400 text-sm mt-2">
-                    Đừng lo lắng! Nhập email của bạn và chúng tôi sẽ gửi link đặt lại mật khẩu ngay lập tức.
+                    Đừng lo lắng! Nhập email của bạn và chúng tôi sẽ gửi mã OTP đặt lại mật khẩu ngay lập tức.
                 </p>
             </div>
 
@@ -75,7 +75,7 @@
                 </div>
 
                 <button type="submit" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-red-900/20 transition-all transform hover:-translate-y-0.5">
-                    Gửi link khôi phục <i class="fa-regular fa-paper-plane ml-2"></i>
+                    Gửi OTP khôi phục <i class="fa-regular fa-paper-plane ml-2"></i>
                 </button>
             </form>
             
