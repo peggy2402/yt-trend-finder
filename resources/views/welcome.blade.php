@@ -115,12 +115,12 @@
                 <div class="bg-[#18181b] rounded-xl p-6 h-full relative z-10 flex flex-col">
                     <div class="flex justify-between items-start mb-6">
                         <div class="w-12 h-12 bg-red-500/20 text-red-500 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-crosshairs"></i>
+                            <i class="fa-solid fa-cart-shopping"></i>
                         </div>
                         <span class="px-2 py-1 bg-green-500/20 text-green-400 text-[10px] font-bold rounded uppercase border border-green-500/20">Active</span>
                     </div>
                     
-                    <h3 class="text-xl font-bold mb-2 group-hover:text-red-400 transition-colors">Thế giới VIA</h3>
+                    <h3 class="text-xl font-bold mb-2 group-hover:text-red-400 transition-colors">ZENTRA SHOP VIA</h3>
                     <p class="text-slate-400 text-sm mb-6 flex-grow">
                         Shop Online Chuyên cung cấp nguyên liệu MMO dành cho mọi người. Tham khảo ngay nhé! (Cập nhật mới nhất).
                     </p>
@@ -171,7 +171,26 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Tool 4:  -->
+            <div class="group relative bg-[#131316] border border-slate-800 rounded-2xl p-1 overflow-hidden opacity-60 hover:opacity-100 transition-all">
+                <div class="bg-[#18181b] rounded-xl p-6 h-full relative z-10 flex flex-col">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="w-12 h-12 bg-purple-500/10 text-yellow-500 rounded-xl flex items-center justify-center text-2xl">
+                            <i class="fa-solid fa-language"></i>
+                        </div>
+                        <span class="px-2 py-1 bg-slate-700 text-slate-400 text-[10px] font-bold rounded uppercase">Coming Soon</span>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold mb-2">Tool Automatic Speech & Text Translation</h3>
+                    <p class="text-slate-400 text-sm mb-6 flex-grow">
+                        Sử dụng AI để tạo tiêu đề video "clickbait" hiệu quả cao dựa trên dữ liệu lịch sử.
+                    </p>
+                    
+                    <div class="w-full py-3 rounded-lg border border-slate-800 bg-slate-800/50 text-slate-500 font-bold text-center cursor-not-allowed">
+                        Đang phát triển...
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 

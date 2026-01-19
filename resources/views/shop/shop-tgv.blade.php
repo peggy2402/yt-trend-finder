@@ -141,8 +141,8 @@
 </head>
 <body class="bg-gradient-to-br from-slate-50 to-slate-100 text-secondary font-outfit min-h-screen">
 
-    <!-- Mobile Bottom Sheet Overlay -->
-    <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden"></div>
+    <!-- Mobile Overlay (Shared backdrop) -->
+    <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity"></div>
 
     <!-- MAIN LAYOUT -->
     <div class="min-h-screen flex flex-col">
@@ -153,7 +153,7 @@
                 <div class="flex items-center justify-between h-16">
                     
                     <!-- Mobile Menu Button -->
-                    <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-slate-100">
+                    <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 active:bg-slate-200 transition-colors">
                         <i class="fas fa-bars text-lg text-slate-700"></i>
                     </button>
                     
@@ -164,8 +164,8 @@
                                 <i class="fas fa-store text-white text-sm"></i>
                             </div>
                             <div>
-                                <h1 class="text-lg font-bold text-slate-800 leading-tight">SHOP<span class="text-primary">ZENTRA</span></h1>
-                                <p class="text-[10px] text-slate-500 font-medium">Auto Distribution</p>
+                                <h1 class="text-lg font-bold text-slate-800 leading-tight">ZENTRA<span class="text-primary"> SHOP</span></h1>
+                                <p class="text-[10px] text-slate-500 font-medium">AUTO RE-SELLER</p>
                             </div>
                         </a>
                     </div>
@@ -430,9 +430,9 @@
                                         <i class="fas fa-shopping-cart"></i>
                                         Đơn hàng
                                     </h3>
-                                    <span class="text-xs font-semibold bg-white/20 px-2 py-1 rounded-full">
-                                        <span id="cartItemCount">0</span> sản phẩm
-                                    </span>
+                                    <!-- <span class="text-xs font-semibold bg-white/20 px-2 py-1 rounded-full">
+                                        <span id="cartItemCount"></span> sản phẩm
+                                    </span> -->
                                 </div>
                                 <p class="text-sm text-red-100 opacity-90">Nhập thông tin và thanh toán</p>
                             </div>
@@ -555,22 +555,108 @@
         </main>
     </div>
 
+    <!-- MOBILE MENU DRAWER (NEW) -->
+    <div id="mobileMenuDrawer" class="fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out lg:hidden">
+        <div class="flex flex-col h-full">
+            <!-- Header -->
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-primary to-red-700 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-store text-white text-sm"></i>
+                    </div>
+                    <span class="font-bold text-slate-800">Menu</span>
+                </div>
+                <button id="closeMobileMenuBtn" class="p-2 text-slate-500 hover:text-red-500 transition rounded-lg hover:bg-red-50">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Content -->
+            <div class="p-4 flex-1 overflow-y-auto space-y-6">
+                <!-- User Info -->
+                <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+                     <div class="flex items-center gap-3 mb-3">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=dc2626&color=fff&bold=true&size=128" 
+                             alt="Avatar" class="w-10 h-10 rounded-full">
+                        <div class="flex-1 min-w-0">
+                            <div class="font-bold text-slate-800 truncate">{{ Auth::user()->name }}</div>
+                            <div class="text-primary font-bold text-sm">{{ number_format(Auth::user()->balance, 0, ',', '.') }}đ</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="{{ route('deposit') }}" class="flex items-center justify-center gap-2 bg-green-50 text-green-700 px-3 py-2.5 rounded-lg text-xs font-bold border border-green-200 hover:bg-green-100 transition">
+                            <i class="fas fa-wallet"></i> Nạp tiền
+                        </a>
+                        <a href="{{ route('history') }}" class="flex items-center justify-center gap-2 bg-slate-50 text-slate-700 px-3 py-2.5 rounded-lg text-xs font-bold border border-slate-200 hover:bg-slate-100 transition">
+                            <i class="fas fa-history"></i> Lịch sử
+                        </a>
+                    </div>
+                </div>
+    
+                <!-- Menu Links -->
+                <div class="space-y-1">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Điều hướng</p>
+                    <a href="/" class="flex items-center gap-3 px-3 py-3 rounded-lg bg-red-50 text-red-600 font-medium border border-red-100">
+                        <i class="fas fa-home w-5 text-center"></i> Trang chủ
+                    </a>
+
+                    <!-- MENU DANH MỤC DROPDOWN (NEW) -->
+                    <div class="relative">
+                        <button id="mobileCategoryDropdownBtn" class="w-full flex items-center justify-between px-3 py-3 rounded-lg text-slate-600 hover:bg-slate-50 font-medium transition border border-transparent hover:border-slate-100 group text-left">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-list w-5 text-center group-hover:text-primary transition-colors"></i> 
+                                <span>Danh mục sản phẩm</span>
+                            </div>
+                            <i id="mobileCategoryChevron" class="fas fa-chevron-right text-xs text-slate-400 transition-transform duration-200"></i>
+                        </button>
+                        
+                        <!-- Dropdown List -->
+                        <div id="mobileCategoryDropdownList" class="hidden pl-4 pr-2 space-y-1 mt-1 mb-2">
+                            <div class="text-xs text-slate-400 py-2 pl-8">Đang tải danh mục...</div>
+                        </div>
+                    </div>
+
+                    <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-3 py-3 rounded-lg text-slate-600 hover:bg-slate-50 font-medium transition border border-transparent hover:border-slate-100">
+                        <i class="fas fa-user-cog w-5 text-center"></i> Cài đặt tài khoản
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-slate-600 hover:bg-red-50 hover:text-red-600 font-medium transition border border-transparent hover:border-red-100 text-left">
+                            <i class="fas fa-sign-out-alt w-5 text-center"></i> Đăng xuất
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Support -->
+                 <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="fas fa-headset text-blue-600"></i>
+                        <span class="font-bold text-blue-800">Hỗ trợ</span>
+                    </div>
+                    <a href="https://t.me/peggyval" target="_blank" class="block w-full text-center bg-white text-blue-600 border border-blue-200 py-2.5 rounded-lg text-sm font-bold shadow-sm active:scale-95 transition">
+                        Chat Telegram
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MOBILE BOTTOM SHEET - Buy Form (Mobile) -->
-    <div id="mobileBottomSheet" class="mobile-bottom-sheet closed lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white rounded-t-2xl shadow-2xl border-t border-slate-200 max-h-[85vh] overflow-y-auto">
+    <div id="mobileBottomSheet" class="mobile-bottom-sheet closed lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-2xl border-t border-slate-200 max-h-[85vh] overflow-y-auto">
         <!-- Sheet Handle -->
-        <div class="flex justify-center pt-3">
+        <div class="flex justify-center pt-3 cursor-grab active:cursor-grabbing">
             <div class="w-12 h-1.5 bg-slate-300 rounded-full"></div>
         </div>
         
         <!-- Sheet Content -->
-        <div class="p-5">
+        <div class="p-5 pb-8">
             <!-- Sheet Header -->
             <div class="flex items-center justify-between mb-4">
                 <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
                     <i class="fas fa-shopping-cart text-primary"></i>
                     Đơn hàng
                 </h3>
-                <button id="closeSheet" class="p-2 hover:bg-slate-100 rounded-lg">
+                <button id="closeSheet" class="p-2 hover:bg-slate-100 rounded-lg transition-colors">
                     <i class="fas fa-times text-slate-500"></i>
                 </button>
             </div>
@@ -623,13 +709,13 @@
             <!-- Action Buttons (Mobile) -->
             <div class="space-y-3">
                 <button id="mobileBtnBuy" 
-                        class="w-full bg-gradient-to-r from-primary to-red-600 text-white font-bold py-3.5 rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        class="w-full bg-gradient-to-r from-primary to-red-600 text-white font-bold py-3.5 rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-95 transition-transform">
                     <i class="fas fa-bolt"></i>
                     THANH TOÁN
                 </button>
                 
                 <button id="mobileBtnReset" 
-                        class="w-full border border-slate-300 text-slate-600 font-semibold py-3 rounded-xl">
+                        class="w-full border border-slate-300 text-slate-600 font-semibold py-3 rounded-xl hover:bg-slate-50 active:scale-95 transition-transform">
                     <i class="fas fa-redo mr-2"></i>
                     Chọn lại
                 </button>
@@ -638,7 +724,7 @@
     </div>
 
     <!-- NEW SUCCESS MODAL (QUICKVIEW) -->
-    <div id="successModal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div id="successModal" class="fixed inset-0 z-[70] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <!-- Backdrop -->
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity opacity-0" id="successModalBackdrop"></div>
         
@@ -699,9 +785,9 @@
         </div>
     </div>
     <!-- Toast nhỏ -->
-    <div id="toast-float" class="fixed top-5 right-5 z-50"></div>
+    <div id="toast-float" class="fixed top-5 right-5 z-[80]"></div>
 
-    <!-- Confirm modal - ĐÃ SỬA: Thêm Flexbox để căn giữa -->
+    <!-- Confirm modal -->
     <div id="toast-overlay" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300">
         <div id="toast-modal" class="w-full flex justify-center p-4"></div>
     </div>
@@ -712,34 +798,76 @@
     
     <!-- Enhanced UI Script -->
     <script>
-        // Mobile Bottom Sheet Control
+        // Mobile UI Controls
         const mobileSheet = document.getElementById('mobileBottomSheet');
         const mobileOverlay = document.getElementById('mobileOverlay');
         const closeSheetBtn = document.getElementById('closeSheet');
+        const mobileMenuDrawer = document.getElementById('mobileMenuDrawer');
+        const closeMobileMenuBtn = document.getElementById('closeMobileMenuBtn');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         
-        // Open mobile bottom sheet when product is selected
+        // Helper: Toggle Overlay
+        function toggleOverlay(show) {
+            if (show) {
+                mobileOverlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                mobileOverlay.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        // --- MOBILE MENU FUNCTIONS ---
+        function openMobileMenu() {
+            // Close sheet if open
+            if (!mobileSheet.classList.contains('closed')) closeMobileSheet(false);
+            
+            mobileMenuDrawer.classList.remove('-translate-x-full');
+            toggleOverlay(true);
+        }
+        
+        function closeMobileMenu(hideOverlay = true) {
+            mobileMenuDrawer.classList.add('-translate-x-full');
+            if (hideOverlay) toggleOverlay(false);
+        }
+        
+        // --- BOTTOM SHEET FUNCTIONS ---
         function openMobileSheet() {
+            // Close menu if open
+            if (!mobileMenuDrawer.classList.contains('-translate-x-full')) closeMobileMenu(false);
+            
             mobileSheet.classList.remove('closed');
             mobileSheet.classList.add('open');
-            mobileOverlay.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
+            toggleOverlay(true);
         }
         
-        // Close mobile bottom sheet
-        function closeMobileSheet() {
+        function closeMobileSheet(hideOverlay = true) {
             mobileSheet.classList.remove('open');
             mobileSheet.classList.add('closed');
-            mobileOverlay.classList.add('hidden');
-            document.body.style.overflow = 'auto';
+            if (hideOverlay) toggleOverlay(false);
         }
         
-        // Event Listeners
-        closeSheetBtn?.addEventListener('click', closeMobileSheet);
-        mobileOverlay?.addEventListener('click', closeMobileSheet);
+        // --- EVENT LISTENERS ---
+        mobileMenuBtn?.addEventListener('click', openMobileMenu);
+        closeMobileMenuBtn?.addEventListener('click', () => closeMobileMenu(true));
+        closeSheetBtn?.addEventListener('click', () => closeMobileSheet(true));
         
-        // Prevent sheet close when clicking inside
-        mobileSheet?.addEventListener('click', (e) => {
-            e.stopPropagation();
+        // Clicking overlay closes everything
+        mobileOverlay?.addEventListener('click', () => {
+            closeMobileMenu(true);
+            closeMobileSheet(true);
+        });
+        
+        // Prevent closing when clicking inside content
+        mobileSheet?.addEventListener('click', (e) => e.stopPropagation());
+        mobileMenuDrawer?.addEventListener('click', (e) => e.stopPropagation());
+        
+        // Close on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMobileMenu(true);
+                closeMobileSheet(true);
+            }
         });
         
         // Quantity controls
@@ -801,7 +929,7 @@
             }
         });
         
-        // Product selection handler (example)
+        // Product selection handler
         function selectProduct(product) {
             // Update desktop view
             document.getElementById('selectedProductDisplay').innerHTML = `
@@ -822,16 +950,14 @@
             
             // Update mobile view
             document.getElementById('mobileSelectedProduct').innerHTML = `
-                <div class="bg-slate-50 p-3 rounded-xl">
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-bold text-slate-800 text-sm">${product.name}</h4>
+                        <span class="text-xs text-green-600 font-semibold">${product.stock} có sẵn</span>
+                    </div>
                     <div class="flex items-center justify-between">
-                        <div>
-                            <h4 class="font-bold text-slate-800">${product.name}</h4>
-                            <p class="text-xs text-slate-500">${product.category}</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-lg font-bold text-primary">${formatCurrency(product.price)}</div>
-                            <div class="text-xs text-slate-500">còn ${product.stock} cái</div>
-                        </div>
+                        <p class="text-xs text-slate-500">${product.category}</p>
+                        <div class="text-lg font-bold text-primary">${formatCurrency(product.price)}</div>
                     </div>
                 </div>
             `;
@@ -885,23 +1011,6 @@
                 document.getElementById('todayOrders').textContent = '156';
             }, 1000);
         });
-        
-        // Close sheet on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeMobileSheet();
-            }
-        });
-        
-        // Example product data structure
-        const exampleProduct = {
-            id: 1,
-            name: 'Facebook Ads Account',
-            category: 'Facebook',
-            price: 150000,
-            stock: 10,
-            status: 'available'
-        };
     </script>
 </body>
 </html>

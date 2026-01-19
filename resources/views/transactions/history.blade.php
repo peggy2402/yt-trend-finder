@@ -91,7 +91,7 @@
             </div>
         </div>
     </div>
-
+    <div id="toast-history"></div>
     <script>
         function viewOrder(id) {
             const content = document.getElementById('order-content-' + id).value;
@@ -109,7 +109,20 @@
             const content = document.getElementById('modalContent');
             content.select();
             document.execCommand('copy');
-            alert('Đã copy vào bộ nhớ đệm!');
+            showToast('Đã copy vào bộ nhớ đệm!', 'success');
+        }
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-history');
+
+            const toast = document.createElement('div');
+            toast.classList.add('toast', type);
+            toast.innerText = message;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
         }
     </script>
 </x-app-layout>
