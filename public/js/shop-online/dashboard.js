@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- DOM ELEMENTS ---
     const els = {
-        balance: document.getElementById('userBalance'),
+        desktopBalance: document.getElementById('desktopUserBalance'),
+        mobileBalance: document.getElementById('mobileUserBalance'),
         username: document.getElementById('userName'),
         productList: document.getElementById('productList'),
         categoryList: document.getElementById('categoryList'), // Sidebar danh mục
@@ -27,12 +28,19 @@ document.addEventListener('DOMContentLoaded', () => {
         totalPriceDisplay: document.getElementById('totalPrice'),
         resultArea: document.getElementById('resultArea'),
         btnBuy: document.getElementById('btnBuy'),
+        // MODAL ELEMENTS
+        successModal: document.getElementById('successModal'),
+        successModalBackdrop: document.getElementById('successModalBackdrop'),
+        successModalContent: document.getElementById('successModalContent'),
+        closeSuccessModalBtn: document.getElementById('closeSuccessModalBtn'),
+        purchasedData: document.getElementById('purchasedData'),
+        copyDataBtn: document.getElementById('copyDataBtn'),
     };
 
     // --- HELPER ---
     const money = (amount) => {
         const num = parseFloat(amount) || 0;
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
+        return new Intl.NumberFormat('vi-VN').format(num) + ' đ';
     };
 
     const getFlagUrl = (code) => {
@@ -47,29 +55,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const name = categoryName.toLowerCase();
         
         // Social Media
-        if (name.includes('facebook') || name.includes('fb')) return '👥';
-        if (name.includes('instagram') || name.includes('ig')) return '📸';
-        if (name.includes('twitter') || name.includes('x')) return '🐦';
-        if (name.includes('tiktok')) return '🎵';
-        if (name.includes('youtube') || name.includes('yt')) return '▶️';
-        if (name.includes('linkedin')) return '💼';
+        if (name.includes('facebook') || name.includes('fb')) return '<img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" class="w-6 h-6">';
+        if (name.includes('instagram') || name.includes('ig')) return '<img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" class="w-6 h-6">';
+        if (name.includes('twitter') || name.includes('x')) return '<img src="https://cdn.wikiwiki.jp/to/w/sudomemoflip/MenuBar/::attach/x_logo.png?rev=d33f848a50c3345d4d084fb7d4838da3&t=20230730105059" class="w-6 h-6">';
+        if (name.includes('tiktok')) return '<img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" class="w-6 h-6">';
+        if (name.includes('youtube') || name.includes('yt')) return '<img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" class="w-6 h-6">';
+        if (name.includes('linkedin')) return '<img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" class="w-6 h-6">';
         
         // Services & Tools
-        if (name.includes('gmail') || name.includes('email') || name.includes('mail')) return '📧';
-        if (name.includes('google') || name.includes('gg')) return '🔍';
-        if (name.includes('ads') || name.includes('quảng cáo')) return '📢';
-        if (name.includes('vpn') || name.includes('proxy')) return '🔒';
-        if (name.includes('cloud') || name.includes('drive')) return '☁️';
-        if (name.includes('domain') || name.includes('hosting')) return '🌐';
+        if (name.includes('gmail') || name.includes('email') || name.includes('mail')) return '<img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" class="w-6 h-6">';
+        if (name.includes('google') || name.includes('gg')) return '<img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" class="w-6 h-6">';
+        if (name.includes('pia s5 proxy')) return '<img src="https://proxy-zone.net/wp-content/uploads/2023/08/PIA-S5-Proxy-Logo-2048x1962.png" class="w-6 h-6">';
+        if (name.includes('express vpn')) return '<img src="https://diebestenvpn.at/wp-content/uploads/2017/06/expressvpn-logo-600x600_preview-1024x1024.jpg" class="w-6 h-6">';
+        if (name.includes('nord vpn')) return '<img src="https://cdn.joinhoney.com/images/lp/store-logos/nord-vpn-logo.png" class="w-6 h-6">';
+        if (name.includes('surfshark')) return '<img src="https://assets.findstack.com/5ztz4p92626ewg5l7f6ui5kp15qb" class="w-6 h-6">';
+        // if (name.includes('cloud') || name.includes('drive')) return '☁️';
+        // if (name.includes('domain') || name.includes('hosting')) return '🌐';
         
-        // Gaming & Entertainment  
-        if (name.includes('game') || name.includes('steam')) return '🎮';
-        if (name.includes('netflix') || name.includes('spotify')) return '🎬';
-        
-        // Finance & Payment
-        if (name.includes('bank') || name.includes('ngân hàng')) return '🏦';
-        if (name.includes('card') || name.includes('thẻ')) return '💳';
-        if (name.includes('payment') || name.includes('thanh toán')) return '💰';
+        if (name.includes('hma vpn')) return '<img src="https://www.vpngids.nl/wp-content/uploads/hma-vpn-logo-png-fallback.png" class="w-6 h-6">';
+        if (name.includes('capcut pro')) return '<img src="https://www.pngall.com/wp-content/uploads/13/Capcut-Transparent.png" class="w-6 h-6">';
+        if (name.includes('cavana pro')) return '<img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/canva-icon.png" class="w-6 h-6">';
+        if (name.includes('chat gpt')) return '<img src="https://s3-alpha.figma.com/hub/file/2732115288/c4c05388-d833-45ac-913b-c914cf08187a-cover.png" class="w-6 h-6">';
+        if (name.includes('veo 3')) return '<img src="https://veo3api.com/logo.png" class="w-6 h-6">';
+        if (name.includes('gemini pro')) return '<img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/google-gemini-icon.png" class="w-6 h-6">';
+        if (name.includes('mst us')) return '<img src="https://luatnhandan.vn/wp-content/uploads/2019/12/ho-kinh-doanh-gia-dinh-co-can-dang-ky-ma-so-thue-khong-e1575560020944.jpg" class="w-6 h-6">';
+        if (name.includes('tool auto')) return '<img src="https://static.vecteezy.com/system/resources/previews/013/658/544/original/automation-clip-art-icon-vector.jpg" class="w-6 h-6">';
+        if (name.includes('tool get')) return '<img src="https://static.vecteezy.com/system/resources/previews/013/658/544/original/automation-clip-art-icon-vector.jpg" class="w-6 h-6">';
+        if (name.includes('adobe')) return '<img src="https://www.adobe.com/content/dam/dx-dc/us/en/acrobat/acrobat_prodc_appicon_noshadow_1024.png.img.png" class="w-6 h-6">';
         
         // Default
         return '📦';
@@ -84,7 +96,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await res.json();
             
             if (result.status === 'success' && result.data) {
-                if(els.balance) els.balance.innerText = money(result.data.balance);
+                const formattedBalance = money(result.data.balance);
+                
+                // Cập nhật cả 2 vị trí hiển thị số dư
+                if(els.desktopBalance) els.desktopBalance.innerText = formattedBalance;
+                if(els.mobileBalance) els.mobileBalance.innerText = formattedBalance;
+                
+                // Cập nhật tên người dùng
                 if(els.username) els.username.innerText = result.data.username || 'User';
             }
         } catch (e) {
@@ -590,7 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (els.btnBuy) {
             els.btnBuy.disabled = amount <= 0 || amount > state.selectedProduct.amount;
             if(amount > state.selectedProduct.amount) {
-                alert(`Kho chỉ còn ${state.selectedProduct.amount} sản phẩm!`);
+                showToast(`Kho chỉ còn ${state.selectedProduct.amount} sản phẩm!`, "warning");
                 els.amountInput.value = state.selectedProduct.amount;
                 updateTotal();
             }
@@ -621,84 +639,195 @@ document.addEventListener('DOMContentLoaded', () => {
     if (els.btnBuy) {
         els.btnBuy.addEventListener('click', async () => {
             if (!state.selectedProduct) {
-                alert('Vui lòng chọn sản phẩm trước!');
+                showToast("Vui lòng chọn sản phẩm trước", "warning");
                 return;
             }
 
             const amount = els.amountInput.value;
-            const confirmMsg = `Xác nhận mua ${amount} ${state.selectedProduct.name}?\nTổng tiền: ${els.totalPriceDisplay.innerText}`;
-            
-            if (!confirm(confirmMsg)) return;
+            const confirmMsg = `
+                <div class="space-y-4 md:space-y-5">
+                    <!-- Info box -->
+                    <div class="bg-gradient-to-br from-slate-50 to-white border border-slate-200 rounded-xl md:rounded-xl p-4 md:p-5 space-y-4">
+                        <!-- Amount -->
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 md:w-5 md:h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                <span class="text-sm text-slate-600">Số lượng</span>
+                            </div>
+                            <span class="font-bold text-base md:text-lg text-blue-600">${amount}</span>
+                        </div>
 
-            // UI Loading
-            els.btnBuy.disabled = true;
-            const originalBtnText = els.btnBuy.innerHTML;
-            els.btnBuy.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-            if (els.resultArea) els.resultArea.classList.add('hidden');
+                        <!-- Product -->
+                        <div class="flex items-start justify-between pb-3 border-b border-slate-100">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 md:w-5 md:h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                                <span class="text-sm text-slate-600">Sản phẩm</span>
+                            </div>
+                            <div class="max-w-[60%] text-right ml-2">
+                                <div class="font-semibold text-sm md:text-base text-purple-700 leading-tight">${state.selectedProduct.name}</div>
+                                ${state.selectedProduct.code ? `<div class="text-xs text-slate-500 mt-1">Mã: ${state.selectedProduct.code}</div>` : ''}
+                            </div>
+                        </div>
 
-            try {
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                
-                const res = await fetch('/tool/buy', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    body: JSON.stringify({
-                        product_id: state.selectedProduct.id,
-                        amount: amount,
-                        product_name: state.selectedProduct.name,
-                        current_price: state.selectedProduct.price
-                    })
-                });
+                        <!-- Total Payment -->
+                        <div class="flex items-center justify-between pt-2">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 md:w-5 md:h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="text-sm text-slate-600">Tổng thanh toán</span>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-lg md:text-xl text-red-600">${els.totalPriceDisplay.innerText}</div>
+                                <div class="text-xs text-slate-500 mt-0.5">Đã bao gồm VAT</div>
+                            </div>
+                        </div>
+                    </div>
 
-                const result = await res.json();
+                    <!-- Note -->
+                    <div class="bg-blue-50/80 border border-blue-100 rounded-lg p-3 md:p-4">
+                        <div class="flex items-start space-x-2">
+                            <svg class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div class="text-xs md:text-sm text-blue-700">
+                                <span class="font-medium">Lưu ý:</span> Đơn hàng sẽ được xử lý trong vòng 24 giờ. Vui lòng kiểm tra kỹ thông tin trước khi xác nhận.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showConfirmToast(confirmMsg, async () => {
 
-                if (res.ok && (result.status === 'success' || result.success)) {
-                    showSuccess(result);
-                    loadProfile(); // Cập nhật tiền
-                    loadProducts(); // Cập nhật kho
-                } else {
-                    showError(result);
+                // Từ đây trở xuống mới là logic mua thật
+                els.btnBuy.disabled = true;
+                const originalBtnText = els.btnBuy.innerHTML;
+                els.btnBuy.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+
+                try {
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                    const res = await fetch('/tool/buy', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({
+                            product_id: state.selectedProduct.id,
+                            amount: amount,
+                            product_name: state.selectedProduct.name,
+                            current_price: state.selectedProduct.price
+                        })
+                    });
+
+                    const result = await res.json();
+
+                    if (res.ok && (result.status === 'success' || result.success)) {
+                        showSuccess(result);
+                        loadProfile();
+                        loadProducts();
+                    } else {
+                        showError(result);
+                    }
+                    
+                } catch (e) {
+                    console.error(e);
+                    showError({ msg: 'Lỗi hệ thống. Vui lòng thử lại.' });
+                } finally {
+                    els.btnBuy.disabled = false;
+                    els.btnBuy.innerHTML = originalBtnText;
                 }
+            }, {
+                title: 'Xác nhận đơn hàng',
+                cancelText: 'Quay lại',
+                confirmText: 'Đặt hàng ngay',
+                showCloseBtn: true
+            });
 
-            } catch (e) {
-                console.error(e);
-                showError({ msg: 'Lỗi hệ thống. Vui lòng thử lại.' });
-            } finally {
-                els.btnBuy.disabled = false;
-                els.btnBuy.innerHTML = originalBtnText;
-            }
         });
     }
 
+    // --- MODAL FUNCTIONS (MỚI) ---
     function showSuccess(result) {
-        if (!els.resultArea) return;
-        els.resultArea.classList.remove('hidden');
-        els.resultArea.className = 'mt-4 animate-fade-in-up';
-        
+        if (!els.successModal || !els.purchasedData) {
+            // Fallback nếu không có modal
+            console.error('Modal elements not found');
+            return;
+        }
+
         const apiData = result.data || {};
-        // Data trả về có thể là array hoặc object tùy API
         const dataContent = Array.isArray(apiData) ? apiData : (apiData.data || apiData);
         const accounts = Array.isArray(dataContent) ? dataContent.join('\n') : JSON.stringify(dataContent);
         
-        els.resultArea.innerHTML = `
-            <div class="bg-green-50 border border-green-200 rounded-xl p-4">
-                <div class="flex items-center gap-2 text-green-700 font-bold mb-2">
-                    <i class="fa-solid fa-circle-check"></i> ${result.msg || 'Giao dịch thành công!'}
-                </div>
-                <div class="relative">
-                    <textarea class="w-full h-32 p-3 text-xs font-mono bg-white border border-green-200 rounded-lg focus:outline-none resize-none text-slate-700" readonly>${accounts}</textarea>
-                    <button onclick="navigator.clipboard.writeText(this.previousElementSibling.value); this.innerHTML='<i class=\\'fa-solid fa-check\\'></i> Đã Copy';" class="absolute top-2 right-2 bg-green-100 hover:bg-green-200 text-green-700 text-xs px-2 py-1 rounded transition">
-                        <i class="fa-regular fa-copy"></i> Copy
-                    </button>
-                </div>
-                <div class="mt-2 text-xs text-green-600">
-                    * Vui lòng lưu lại dữ liệu này ngay.
-                </div>
-            </div>
-        `;
+        // 1. Set nội dung
+        els.purchasedData.value = accounts;
+        
+        // 2. Hiển thị modal
+        els.successModal.classList.remove('hidden');
+        
+        // 3. Animation Open
+        // Timeout nhỏ để đảm bảo class 'hidden' đã được remove trước khi thêm transition classes
+        setTimeout(() => {
+            if(els.successModalBackdrop) els.successModalBackdrop.classList.remove('opacity-0');
+            if(els.successModalContent) {
+                els.successModalContent.classList.remove('opacity-0', 'scale-95');
+                els.successModalContent.classList.add('opacity-100', 'scale-100');
+            }
+        }, 10);
+
+        // 4. Close mobile sheet if open
+        const closeSheetFn = window.closeMobileSheet;
+        if (typeof closeSheetFn === 'function') {
+            closeSheetFn();
+        }
+    }
+
+    function closeModal() {
+        if (!els.successModal) return;
+
+        // 1. Animation Close
+        if(els.successModalBackdrop) els.successModalBackdrop.classList.add('opacity-0');
+        if(els.successModalContent) {
+            els.successModalContent.classList.remove('opacity-100', 'scale-100');
+            els.successModalContent.classList.add('opacity-0', 'scale-95');
+        }
+        
+        // 2. Hide modal after animation finishes
+        setTimeout(() => {
+            els.successModal.classList.add('hidden');
+        }, 300); // Matches transition duration
+    }
+
+    // Event listeners for Modal
+    if(els.closeSuccessModalBtn) {
+        els.closeSuccessModalBtn.addEventListener('click', closeModal);
+    }
+    
+    // Close when clicking backdrop
+    if(els.successModalBackdrop) {
+        els.successModalBackdrop.addEventListener('click', closeModal);
+    }
+
+    // Copy button in modal
+    if (els.copyDataBtn && els.purchasedData) {
+        els.copyDataBtn.addEventListener('click', () => {
+            els.purchasedData.select();
+            navigator.clipboard.writeText(els.purchasedData.value).then(() => {
+                const originalText = els.copyDataBtn.innerHTML;
+                els.copyDataBtn.innerHTML = '<i class="fa-solid fa-check text-emerald-500"></i> Đã sao chép';
+                els.copyDataBtn.classList.add('bg-emerald-50', 'text-emerald-700', 'ring-emerald-200');
+                
+                setTimeout(() => {
+                    els.copyDataBtn.innerHTML = originalText;
+                    els.copyDataBtn.classList.remove('bg-emerald-50', 'text-emerald-700', 'ring-emerald-200');
+                }, 2000);
+            });
+        });
     }
 
     function showError(result) {
@@ -1133,3 +1262,117 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 250);
     });
 });
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-float');
+
+    const toast = document.createElement('div');
+    toast.classList.add('toast', type);
+    toast.innerText = message;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+function showConfirmToast(message, onConfirm, options = {}) {
+    const container = document.getElementById('toast-modal');
+    const overlay = document.getElementById('toast-overlay');
+    
+    // Ẩn overlay cũ nếu đang hiển thị
+    overlay.classList.remove('hidden');
+    
+    // Default options
+    const { 
+        title = 'Xác nhận đơn hàng', 
+        cancelText = 'Quay lại', 
+        confirmText = 'Đặt hàng ngay',
+        showCloseBtn = true,
+        onCancel = null
+    } = options;
+
+    // Tạo nội dung modal
+    const modalContent = `
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[440px] mx-4 animate-scaleIn overflow-hidden border border-slate-200">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-slate-800">${title}</h3>
+                ${showCloseBtn ? `
+                    <button type="button" class="close-btn text-slate-400 hover:text-slate-700 transition-colors p-1 rounded-full hover:bg-slate-100">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                ` : ''}
+            </div>
+            
+            <!-- Body - Message Content -->
+            <div class="p-6 message-content max-h-[60vh] overflow-y-auto">
+                ${message}
+            </div>
+            
+            <!-- Footer - Action Buttons -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100">
+                <div class="flex flex-col-reverse sm:flex-row gap-3">
+                    <button type="button" class="cancel-btn px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg transition-colors duration-200 text-base flex-1 sm:flex-none">
+                        ${cancelText}
+                    </button>
+                    <button type="button" class="confirm-btn px-5 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow text-base flex-1 sm:flex-none">
+                        ${confirmText}
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Xóa modal cũ và thêm modal mới
+    container.innerHTML = modalContent;
+    
+    // Lấy phần tử modal mới
+    const modal = container.querySelector('div');
+    
+    // Hàm đóng modal
+    const closeModal = () => {
+        overlay.classList.add('hidden');
+        container.innerHTML = '';
+    };
+    
+    // Xử lý sự kiện click trên overlay (bên ngoài modal)
+    overlay.addEventListener('click', function overlayClickHandler(e) {
+        if (e.target === overlay) {
+            closeModal();
+            if (onCancel) onCancel();
+            // Xóa event listener sau khi dùng
+            overlay.removeEventListener('click', overlayClickHandler);
+        }
+    });
+    
+    // Xử lý sự kiện nút đóng
+    const closeBtn = modal.querySelector('.close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            closeModal();
+            if (onCancel) onCancel();
+        });
+    }
+    
+    // Xử lý sự kiện nút huỷ
+    const cancelBtn = modal.querySelector('.cancel-btn');
+    cancelBtn.addEventListener('click', () => {
+        closeModal();
+        if (onCancel) onCancel();
+    });
+    
+    // Xử lý sự kiện nút xác nhận
+    const confirmBtn = modal.querySelector('.confirm-btn');
+    confirmBtn.addEventListener('click', () => {
+        closeModal();
+        onConfirm();
+    });
+    
+    // Ngăn sự kiện click trong modal lan ra ngoài
+    modal.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+}

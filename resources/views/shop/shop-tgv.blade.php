@@ -31,6 +31,8 @@
                         'fade-in': 'fadeIn 0.3s ease-in-out',
                         'slide-up': 'slideUp 0.3s ease-out',
                         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slight': 'bounceSlight 2s infinite',
+                        'pop-in': 'popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                     },
                     keyframes: {
                         fadeIn: {
@@ -40,6 +42,14 @@
                         slideUp: {
                             '0%': { transform: 'translateY(20px)', opacity: '0' },
                             '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        bounceSlight: {
+                            '0%, 100%': { transform: 'translateY(-5%)' },
+                            '50%': { transform: 'translateY(0)' },
+                        },
+                        popIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
                         }
                     }
                 }
@@ -107,6 +117,26 @@
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
+
+        /* Success Modal Animation */
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 300ms, transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .modal-exit {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .modal-exit-active {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 200ms, transform 200ms;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 to-slate-100 text-secondary font-outfit min-h-screen">
@@ -145,7 +175,7 @@
                         <!-- Balance - Mobile -->
                         <div class="lg:hidden">
                             <div class="px-3 py-1 bg-primary-light rounded-full border border-red-200">
-                                <span class="text-xs font-bold text-primary">
+                                <span id="mobileUserBalance" class="text-xs font-bold text-primary">
                                     {{ number_format(Auth::user()->balance, 0, ',', '.') }}đ
                                 </span>
                             </div>
@@ -199,10 +229,10 @@
                                  alt="Avatar" 
                                  class="w-14 h-14 rounded-xl border-2 border-white shadow">
                             <div class="flex-1">
-                                <h3 class="font-bold text-slate-800 truncate">{{ Auth::user()->name }}</h3>
+                                <h3 id="userName" class="font-bold text-slate-800 truncate">{{ Auth::user()->name }}</h3>
                                 <p class="text-xs text-slate-500 truncate">{{ Auth::user()->email }}</p>
                                 <div class="mt-2">
-                                    <div class="text-sm font-bold text-primary bg-primary-light px-3 py-1 rounded-lg inline-block border border-red-200">
+                                    <div id="desktopUserBalance" class="text-sm font-bold text-primary bg-primary-light px-3 py-1 rounded-lg inline-block border border-red-200">
                                         {{ number_format(Auth::user()->balance, 0, ',', '.') }}đ
                                     </div>
                                 </div>
@@ -500,7 +530,7 @@
                                     </button>
                                 </div>
                                 
-                                <!-- Result Display -->
+                                <!-- Result Display (Legacy, replaced by modal) -->
                                 <div id="resultArea" class="hidden"></div>
                             </div>
                         </div>
@@ -607,6 +637,76 @@
         </div>
     </div>
 
+    <!-- NEW SUCCESS MODAL (QUICKVIEW) -->
+    <div id="successModal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity opacity-0" id="successModalBackdrop"></div>
+        
+        <!-- Modal Content Container -->
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                
+                <!-- Modal Panel -->
+                <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg scale-95 opacity-0" id="successModalContent">
+                    
+                    <!-- Header -->
+                    <div class="bg-gradient-to-br from-emerald-500 to-teal-600 p-6 text-center relative">
+                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur-md mb-4 animate-bounce-slight shadow-lg">
+                            <i class="fa-solid fa-check text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold leading-6 text-white" id="modal-title">Thanh toán thành công!</h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-emerald-50">Cảm ơn bạn đã tin tưởng sử dụng dịch vụ của chúng tôi.</p>
+                        </div>
+                        
+                        <!-- Close Button -->
+                        <button id="closeSuccessModalBtn" class="absolute top-4 right-4 text-white/70 hover:text-white transition rounded-lg p-1 hover:bg-white/10">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Body -->
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2 tracking-wider flex items-center justify-between">
+                                    <span>Thông tin đơn hàng</span>
+                                    <span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-[10px] font-extrabold">ĐÃ THANH TOÁN</span>
+                                </label>
+                                <div class="relative group">
+                                    <div class="absolute inset-0 bg-slate-50 rounded-xl border border-slate-200"></div>
+                                    <textarea id="purchasedData" 
+                                            class="relative block w-full h-40 bg-transparent border-0 focus:ring-0 text-sm font-mono text-slate-700 resize-none p-4 leading-relaxed" 
+                                            readonly></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer Actions -->
+                    <div class="bg-slate-50 px-4 py-4 sm:flex sm:flex-row-reverse sm:px-6 gap-3 border-t border-slate-100">
+                        <a href="{{ route('history') }}" class="inline-flex w-full justify-center rounded-xl bg-emerald-600 px-3 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-200 hover:bg-emerald-500 sm:w-auto sm:flex-1 gap-2 items-center transition-all transform hover:-translate-y-0.5">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                            Lịch sử mua hàng
+                        </a>
+                        <button type="button" id="copyDataBtn" class="mt-3 inline-flex w-full justify-center rounded-xl bg-white px-3 py-3 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 sm:mt-0 sm:w-auto sm:flex-1 gap-2 items-center transition-all">
+                            <i class="fa-regular fa-copy"></i>
+                            Sao chép
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Toast nhỏ -->
+    <div id="toast-float" class="fixed top-5 right-5 z-50"></div>
+
+    <!-- Confirm modal - ĐÃ SỬA: Thêm Flexbox để căn giữa -->
+    <div id="toast-overlay" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300">
+        <div id="toast-modal" class="w-full flex justify-center p-4"></div>
+    </div>
+
+    </div>
     <!-- Load JS -->
     <script src="{{ asset('js/shop-online/dashboard.js') }}"></script>
     
