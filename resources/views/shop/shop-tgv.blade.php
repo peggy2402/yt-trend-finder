@@ -284,9 +284,9 @@
                                 <p class="text-blue-100 text-xs">Giải đáp mọi thắc mắc</p>
                             </div>
                         </div>
-                        <a href="https://t.me/peggyval" target="_blank" 
+                        <a href="https://zalo.me/0862587229" target="_blank" 
                            class="block text-center bg-white text-accent font-bold py-3 rounded-xl text-sm hover:bg-blue-50 transition transform hover:scale-[1.02] active:scale-95">
-                            <i class="fab fa-telegram"></i> Chat Telegram
+                            <i class="fa-solid fa-phone"></i> Chat Zalo
                         </a>
                     </div>
                 </aside>
@@ -633,8 +633,8 @@
                         <i class="fas fa-headset text-blue-600"></i>
                         <span class="font-bold text-blue-800">Hỗ trợ</span>
                     </div>
-                    <a href="https://t.me/peggyval" target="_blank" class="block w-full text-center bg-white text-blue-600 border border-blue-200 py-2.5 rounded-lg text-sm font-bold shadow-sm active:scale-95 transition">
-                        Chat Telegram
+                    <a href="https://zalo.me/0862587229" target="_blank" class="block w-full text-center bg-white text-blue-600 border border-blue-200 py-2.5 rounded-lg text-sm font-bold shadow-sm active:scale-95 transition">
+                        Chat Zalo
                     </a>
                 </div>
             </div>

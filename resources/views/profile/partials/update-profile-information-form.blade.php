@@ -1,13 +1,13 @@
-<section class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 transition-all hover:shadow-md">
+<section class="bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-10 transition-all hover:shadow-md">
     <header class="mb-6 border-b border-slate-100 pb-4">
-        <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-2">
+        <h2 class="text-xl font-extrabold text-slate-100 flex items-center gap-2">
             <span class="w-8 h-8 bg-red-100 text-red-600 rounded-lg flex items-center justify-center text-sm">
                 <i class="fa-solid fa-id-card"></i>
             </span>
             {{ __('Thông tin cá nhân') }}
         </h2>
 
-        <p class="mt-2 text-sm text-slate-500 ml-10">
+        <p class="mt-2 text-sm text-slate-100 ml-10">
             {{ __("Cập nhật thông tin hồ sơ và địa chỉ email của tài khoản.") }}
         </p>
     </header>
@@ -22,24 +22,24 @@
 
         <!-- Name Input -->
         <div>
-            <label for="name" class="block text-sm font-bold text-slate-700 mb-2">{{ __('Họ và Tên') }}</label>
+            <label for="name" class="block text-sm font-bold text-slate-100 mb-2">{{ __('Họ và Tên') }}</label>
             <div class="relative group">
                 <span class="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-red-500 transition-colors">
                     <i class="fa-regular fa-user"></i>
                 </span>
-                <input id="name" name="name" type="text" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-slate-700 font-semibold focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-slate-400" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name" placeholder="Nhập tên hiển thị" />
+                <input id="name" name="name" type="text" class="w-full bg-slate-600 border border-slate-50 rounded-xl py-3 pl-10 pr-4 text-slate-100 font-semibold focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-slate-100" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name" placeholder="Nhập tên hiển thị" />
             </div>
             <x-input-error class="mt-2 text-red-500 text-sm font-medium" :messages="$errors->get('name')" />
         </div>
 
         <!-- Email Input -->
         <div>
-            <label for="email" class="block text-sm font-bold text-slate-700 mb-2">{{ __('Email Đăng nhập') }}</label>
+            <label for="email" class="block text-sm font-bold text-slate-100 mb-2">{{ __('Email Đăng nhập') }}</label>
             <div class="relative group">
                 <span class="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-red-500 transition-colors">
                     <i class="fa-regular fa-envelope"></i>
                 </span>
-                <input id="email" name="email" type="email" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-slate-700 font-semibold focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-slate-400" value="{{ old('email', $user->email) }}" required autocomplete="username" placeholder="name@example.com" />
+                <input id="email" name="email" type="email" class="w-full bg-slate-600 border border-slate-50 rounded-xl py-3 pl-10 pr-4 text-slate-100 font-semibold focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-slate-400" value="{{ old('email', $user->email) }}" required autocomplete="username" placeholder="name@example.com" />
             </div>
             <x-input-error class="mt-2 text-red-500 text-sm font-medium" :messages="$errors->get('email')" />
 

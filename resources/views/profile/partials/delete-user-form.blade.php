@@ -1,4 +1,4 @@
-<section class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 transition-all hover:shadow-md">
+<section class="bg-red-200 p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-10 transition-all hover:shadow-md">
     <header class="mb-6 border-b border-slate-100 pb-4">
         <h2 class="text-xl font-extrabold text-red-600 flex items-center gap-2">
             <span class="w-8 h-8 bg-red-100 text-red-600 rounded-lg flex items-center justify-center text-sm">

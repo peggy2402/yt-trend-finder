@@ -45,7 +45,7 @@
                 @csrf
 
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Mật khẩu hiện tại</label>
+                    <label class="block text-sm font-medium text-slate-100 mb-2">Mật khẩu hiện tại</label>
                     <div class="relative">
                         <span class="absolute left-4 top-3.5 text-slate-500"><i class="fa-solid fa-lock"></i></span>
                         <input type="password" name="password" required autocomplete="current-password" autofocus
