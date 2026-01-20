@@ -14,8 +14,8 @@ class TheGioiViaService
     {
         // Lấy cấu hình từ .env hoặc config/services.php
         // Đảm bảo URL luôn có dấu / ở cuối để nối chuỗi chính xác
-        $this->baseUrl = rtrim(config('services.thegioivia.base_url', 'https://thegioivia.com/api/'), '/') . '/';
-        $this->apiKey = config('services.thegioivia.api_key', '865edd2ddeaef4da15975b3cd5aa6af4nMHsa5uKSRFeAQtyq06TOmfobc8V4JxU');
+        $this->baseUrl = rtrim(config('services.thegioivia.base_url'), '/') . '/';
+        $this->apiKey = config('services.thegioivia.api_key');
     }
 
     /**
