@@ -14,103 +14,182 @@ class ApifyService
 
     public function __construct()
     {
-        // 1. Ưu tiên lấy Token từ Database (Bảng settings)
+        // 1. Ưu tiên lấy Token từ Database
         $dbTokens = null;
         try {
-            // Sử dụng Query Builder trực tiếp để tránh lỗi nếu chưa có Model
             $setting = DB::table('settings')->where('key', 'apify_tokens')->first();
-            if ($setting) {
-                $dbTokens = $setting->value;
-            }
-        } catch (\Exception $e) {
-            // Fallback nếu chưa chạy migration
-        }
+            if ($setting) $dbTokens = $setting->value;
+        } catch (\Exception $e) {}
 
-        // 2. Nếu DB không có, lấy từ .env làm dự phòng
+        // 2. Fallback .env
         $tokenString = $dbTokens ?? env('APIFY_TOKENS', env('APIFY_TOKEN', ''));
+        // Tách chuỗi bằng cả dấu phẩy và xuống dòng
+        $this->tokens = preg_split('/[\r\n,]+/', $tokenString, -1, PREG_SPLIT_NO_EMPTY);
+        $this->tokens = array_map('trim', $this->tokens);
 
-        // 3. Chuyển chuỗi thành mảng, lọc bỏ khoảng trắng
-        $this->tokens = array_values(array_filter(array_map('trim', explode(',', $tokenString))));
-
-        // ID chuẩn của Actor
         $this->actorId = 'clockworks~tiktok-scraper';
     }
 
-    /**
-     * Lấy token đang hoạt động (có cơ chế xoay vòng)
-     */
     protected function getActiveToken()
     {
         if (empty($this->tokens)) return null;
-
-        // Lấy index của token đang dùng từ cache (để dùng ổn định 1 token cho đến khi lỗi)
         $currentIndex = Cache::get('apify_token_index', 0);
-
-        if (!isset($this->tokens[$currentIndex])) {
-            $currentIndex = 0; // Reset nếu index vượt quá
-        }
-
+        if (!isset($this->tokens[$currentIndex])) $currentIndex = 0;
         return $this->tokens[$currentIndex];
     }
 
-    /**
-     * Chuyển sang token tiếp theo khi gặp lỗi
-     */
     protected function rotateToken()
     {
         $currentIndex = Cache::get('apify_token_index', 0);
         $nextIndex = ($currentIndex + 1) % count($this->tokens);
         Cache::put('apify_token_index', $nextIndex);
-
-        Log::warning("Apify: Switching to token index #{$nextIndex}");
+        Log::warning("Apify: Rotating to token index #{$nextIndex}");
         return $this->tokens[$nextIndex];
     }
 
-    // --- HÀM KIỂM TRA KEY (QUAN TRỌNG) ---
+    // --- LOGIC CHECK TIỀN TRIỆT ĐỂ ---
     public function checkKeyStatus($token)
     {
         try {
-            // Gọi vào endpoint nhẹ nhất của Apify để test
-            $response = Http::withToken($token)->timeout(5)->get("https://api.apify.com/v2/users/me");
+            // 1. Gọi API lấy thông tin user (để lấy email)
+            $userResponse = Http::withToken($token)->timeout(10)->get("https://api.apify.com/v2/users/me");
 
-            if ($response->successful()) {
-                $data = $response->json();
-
-                // Lấy thông tin giới hạn (để biết còn tiền không)
-                $limits = $data['data']['limits'] ?? [];
-                $planName = $data['data']['subscription']['name'] ?? 'Free';
-
+            if (!$userResponse->successful()) {
+                if ($userResponse->status() === 401) {
+                    return [
+                        'status' => 'dead',
+                        'message' => 'Token sai/hết hạn',
+                        'plan' => '$0.00 / $5.00',
+                        'remaining' => 0,
+                        'usageUsd' => 0,
+                        'limitUsd' => 5.0
+                    ];
+                }
                 return [
-                    'status' => 'alive',
-                    'message' => 'Hoạt động',
-                    'email' => $data['data']['email'] ?? 'Ẩn',
-                    'plan' => $planName
+                    'status' => 'error',
+                    'message' => 'Lỗi API user: ' . $userResponse->status(),
+                    'plan' => 'Error',
+                    'remaining' => 0,
+                    'usageUsd' => 0,
+                    'limitUsd' => 5.0
                 ];
             }
 
-            if ($response->status() === 401) {
-                return ['status' => 'dead', 'message' => 'Sai Token'];
+            $userData = $userResponse->json();
+            $user = $userData['data'] ?? [];
+            $email = $user['email'] ?? 'N/A';
+
+            // 2. Gọi API LIMITS để lấy giới hạn và số tiền đã dùng CHÍNH XÁC
+            $limitsResponse = Http::withToken($token)->timeout(10)->get("https://api.apify.com/v2/users/me/limits");
+
+            $usageUsd = 0.0;
+            $limitUsd = 5.0; // Mặc định cho free plan
+
+            if ($limitsResponse->successful()) {
+                $limitsData = $limitsResponse->json();
+                $limits = $limitsData['data'] ?? [];
+
+                \Log::info('APIFY LIMITS RESPONSE FOR ' . substr($token, 0, 8), $limits);
+
+                // Lấy giới hạn từ data.limits.maxMonthlyUsageUsd
+                if (isset($limits['limits']['maxMonthlyUsageUsd'])) {
+                    $limitUsd = (float)$limits['limits']['maxMonthlyUsageUsd'];
+                }
+
+                // Lấy số tiền ĐÃ DÙNG từ data.current.monthlyUsageUsd
+                if (isset($limits['current']['monthlyUsageUsd'])) {
+                    $usageUsd = (float)$limits['current']['monthlyUsageUsd'];
+                }
             }
 
-            return ['status' => 'error', 'message' => 'Lỗi: ' . $response->status()];
+            // 3. Nếu không lấy được từ limits, thử từ USAGE endpoint
+            if ($usageUsd === 0.0) {
+                $usageResponse = Http::withToken($token)->timeout(10)->get("https://api.apify.com/v2/users/me/usage/monthly");
+
+                if ($usageResponse->successful()) {
+                    $usageData = $usageResponse->json();
+                    $usageInfo = $usageData['data'] ?? [];
+
+                    // Lấy số tiền đã dùng từ totalUsageCreditsUsdAfterVolumeDiscount
+                    if (isset($usageInfo['totalUsageCreditsUsdAfterVolumeDiscount'])) {
+                        $usageUsd = (float)$usageInfo['totalUsageCreditsUsdAfterVolumeDiscount'];
+                    }
+                    // Hoặc từ totalUsageCreditsUsdBeforeVolumeDiscount
+                    elseif (isset($usageInfo['totalUsageCreditsUsdBeforeVolumeDiscount'])) {
+                        $usageUsd = (float)$usageInfo['totalUsageCreditsUsdBeforeVolumeDiscount'];
+                    }
+                }
+            }
+
+            // 4. Tính toán số dư CHÍNH XÁC với 6 chữ số thập phân
+            $remaining = $limitUsd - $usageUsd;
+
+            // 5. Ước tính chi phí job dựa trên lỗi bạn gặp
+            // Từ các lỗi: $0.172109, $0.201765, $0.205308
+            // Lấy mức cao nhất: $0.21 + thêm buffer $0.04 = $0.25
+            $estimatedJobCost = 0.25;
+
+            // 6. XÁC ĐỊNH TRẠNG THÁI CHÍNH XÁC
+            $status = 'alive';
+            $message = 'Hoạt động';
+
+            // Key chỉ SỐNG nếu còn đủ $estimatedJobCost để chạy job
+            if ($remaining < $estimatedJobCost) {
+                $status = 'dead';
+                $message = 'Không đủ tiền (Còn $' . number_format($remaining, 6) . ')';
+            }
+            // Cảnh báo vàng nếu sắp hết (dưới $1)
+            elseif ($remaining < 1.0) {
+                $message = 'Còn $' . number_format($remaining, 3);
+            }
+
+            // 7. Format hiển thị với 5 chữ số thập phân cho usage
+            $planDisplay = '$' . number_format($usageUsd, 5) . ' / $' . number_format($limitUsd, 2);
+
+            // DEBUG LOG
+            \Log::info("TOKEN STATUS RESULT", [
+                'token' => substr($token, 0, 8) . '...',
+                'email' => $email,
+                'usageUsd' => $usageUsd,
+                'limitUsd' => $limitUsd,
+                'remaining' => $remaining,
+                'status' => $status,
+                'estimated_cost' => $estimatedJobCost
+            ]);
+
+            return [
+                'status' => $status,
+                'message' => $message,
+                'email' => $email,
+                'plan' => $planDisplay,
+                'remaining' => $remaining,
+                'usageUsd' => $usageUsd,
+                'limitUsd' => $limitUsd,
+                'estimated_job_cost' => $estimatedJobCost
+            ];
 
         } catch (\Exception $e) {
-            return ['status' => 'error', 'message' => 'Lỗi mạng'];
+            \Log::error('Apify checkKeyStatus Exception: ' . $e->getMessage());
+            return [
+                'status' => 'error',
+                'message' => 'Lỗi kết nối mạng',
+                'plan' => 'Error',
+                'remaining' => 0,
+                'usageUsd' => 0,
+                'limitUsd' => 5.0
+            ];
         }
     }
 
     public function getTrending($region = 'US', $limit = 50)
     {
         $token = $this->getActiveToken();
+        if (!$token) return ['success' => false, 'message' => 'Hệ thống chưa cấu hình API Key.'];
 
-        if (!$token) {
-            return ['success' => false, 'message' => 'Hệ thống chưa cấu hình API Key. Vui lòng liên hệ Admin.'];
-        }
-
-        // Logic Hashtag (Giữ nguyên)
         $proxyCountry = ($region === 'ALL') ? 'US' : strtoupper($region);
+
         $hashtags = ['fyp', 'trending', 'viral'];
-        if ($region == 'VN') $hashtags = ['xuhuong', 'trending', 'hot', 'tiktokvn'];
+        if ($region == 'VN') $hashtags = ['xuhuong', 'tiktokvn', 'hot'];
         if ($region == 'JP') $hashtags = ['fyp', 'おすすめ'];
         if ($region == 'KR') $hashtags = ['fyp', '추천'];
         if ($region == 'DE') $hashtags = ['fyp', 'fürdich', 'viral'];
@@ -122,7 +201,6 @@ class ApifyService
             "searchType" => "video",
             "hashtags" => $hashtags,
             "proxyCountryCode" => $proxyCountry,
-
             "excludePinnedPosts" => true,
             "scrapeRelatedVideos" => false,
             "shouldDownloadAvatars" => false,
@@ -133,8 +211,7 @@ class ApifyService
             "shouldDownloadVideos" => false,
         ];
 
-        // Cơ chế Retry với Token Rotation
-        $maxRetries = count($this->tokens); // Thử hết số token đang có
+        $maxRetries = count($this->tokens) + 1; // Thử hết vòng + 1
         $attempts = 0;
 
         while ($attempts < $maxRetries) {
@@ -143,31 +220,47 @@ class ApifyService
                     ->timeout(120)
                     ->post("https://api.apify.com/v2/acts/{$this->actorId}/run-sync-get-dataset-items", $input);
 
-                // Nếu thành công -> Trả về luôn
+                // Case 1: Thành công
                 if ($response->successful()) {
                     $data = $response->json();
                     if (empty($data)) return ['success' => false, 'message' => 'Apify trả về rỗng.'];
                     return ['success' => true, 'data' => $data];
                 }
 
-                // Nếu lỗi 401 (Sai token), 402 (Hết tiền), 429 (Quá tải) -> Đổi token
-                if (in_array($response->status(), [401, 402, 429])) {
-                    Log::error("Apify Token Failed [{$response->status()}]: " . substr($token, 0, 10) . "...");
-                    $token = $this->rotateToken(); // Lấy token mới
-                    $attempts++;
-                    continue; // Thử lại vòng lặp
+                // Case 2: Lỗi cần đổi Key
+                $status = $response->status();
+                $body = $response->body();
+                $shouldRotate = false;
+
+                // 401: Unauthorized
+                // 402: Payment Required (Hết tiền)
+                // 429: Too Many Requests (Rate limit)
+                // 422: Unprocessable Entity (Thường chứa lỗi "exceed usage")
+                if (in_array($status, [401, 402, 429])) {
+                    $shouldRotate = true;
+                }
+                elseif ($status === 422 && str_contains($body, 'exceed')) {
+                    // Bắt chính xác lỗi "exceed your remaining usage"
+                    $shouldRotate = true;
                 }
 
-                // Các lỗi khác (500, 404) -> Dừng luôn
-                return ['success' => false, 'message' => 'Lỗi Apify: ' . $response->status()];
+                if ($shouldRotate) {
+                    Log::warning("Apify Key Failed [$status] - Rotating...");
+                    $token = $this->rotateToken();
+                    $attempts++;
+                    continue; // Thử lại ngay với key mới
+                }
+
+                // Case 3: Lỗi khác (Server Error, v.v.)
+                return ['success' => false, 'message' => 'Lỗi Apify: ' . $status . ' - ' . ($response->json()['error']['message'] ?? '')];
 
             } catch (\Exception $e) {
-                Log::error("Apify Exception: " . $e->getMessage());
+                // Lỗi mạng -> Đổi key thử vận may
                 $token = $this->rotateToken();
                 $attempts++;
             }
         }
 
-        return ['success' => false, 'message' => 'Tất cả API Token đều lỗi hoặc hết hạn mức.'];
+        return ['success' => false, 'message' => 'Xin lỗi bạn nhé! Hệ thống đang tự động sửa lỗi. Vui lòng thử lại sau ít phút.'];
     }
 }

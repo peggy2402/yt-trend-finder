@@ -60,7 +60,7 @@
 
 <body class="bg-dark text-slate-300 font-sans antialiased min-h-screen flex flex-col" x-data="tiktokApp()">
 
-    <!-- Navbar (Giữ nguyên) -->
+    <!-- Navbar -->
     <nav class="border-b border-white/10 bg-surface/80 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="font-black text-lg md:text-xl tracking-tighter text-white flex items-center gap-2">
@@ -70,6 +70,7 @@
                 </div>
                 <span class="hidden md:inline">ZENTRA <span class="text-tiktokCyan">HUNTER</span></span>
             </div>
+
             <div class="flex items-center gap-3 md:gap-6">
                 <button @click="showPricing = true"
                     class="group relative flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-tiktokPink/10 to-orange-500/10 border border-tiktokPink/50 hover:border-tiktokPink transition-all overflow-hidden">
@@ -79,50 +80,64 @@
                     <i class="fa-solid fa-crown text-tiktokPink group-hover:animate-bounce"></i>
                     <span class="text-xs font-bold text-white uppercase tracking-wider">Nâng cấp PRO</span>
                 </button>
+
                 <div class="relative">
                     <button @click="toggleProfile()" @click.outside="closeProfile()"
                         class="flex items-center gap-3 focus:outline-none hover:bg-white/5 p-1 rounded-full transition-colors border border-transparent hover:border-white/10">
                         <span class="text-sm font-bold text-white hidden sm:block text-right leading-tight">
                             {{ Auth::user()->name }} <br>
                             <span class="text-[10px] text-tiktokCyan font-normal">Số dư:
-                                {{ number_format(Auth::user()->balance ?? 0) }}đ</span>
+                                <span x-text="formatNumberVND(userBalance)"></span></span>
                         </span>
                         <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}&background=00f2ea&color=000"
                             class="w-9 h-9 rounded-full border-2 border-surface ring-2 ring-white/10">
                     </button>
-                    <div x-show="isProfileOpen"
+
+                    <div x-show="isProfileOpen" x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+                        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 scale-95 translate-y-2"
                         class="absolute right-0 mt-3 w-64 bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl py-2 z-[100]"
                         x-cloak>
+
                         <div class="px-4 py-3 border-b border-white/5 mb-2">
                             <p class="text-xs text-slate-500 uppercase font-bold">Ví tiền</p>
                             <div class="flex justify-between items-center mt-1">
-                                <span
-                                    class="text-xl font-black text-white">{{ number_format(Auth::user()->balance ?? 0) }}</span>
-                                <span class="text-xs text-slate-400">VNĐ</span>
+                                <span class="text-xl font-black text-white"
+                                    x-text="formatNumberVND(userBalance)"></span>
                             </div>
                         </div>
+
                         <a href="{{ route('deposit') }}"
                             class="flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors group">
                             <div
                                 class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500 group-hover:bg-green-500 group-hover:text-white transition-all">
                                 <i class="fa-solid fa-wallet"></i>
-                            </div> Nạp tiền vào ví
+                            </div>
+                            Nạp tiền vào ví
                         </a>
                         <a href="{{ route('history') }}"
                             class="flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors group">
                             <div
                                 class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all">
                                 <i class="fa-solid fa-clock-rotate-left"></i>
-                            </div> Lịch sử giao dịch
+                            </div>
+                            Lịch sử giao dịch
                         </a>
                         <div class="h-px bg-white/5 my-2 mx-4"></div>
-                        <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit"
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit"
                                 class="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors group">
                                 <div
                                     class="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-all">
                                     <i class="fa-solid fa-right-from-bracket"></i>
-                                </div> Đăng xuất
-                            </button></form>
+                                </div>
+                                Đăng xuất
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -131,7 +146,7 @@
 
     <main class="flex-grow container mx-auto px-4 py-8 relative">
 
-        <!-- Loading Overlay (Giữ nguyên) -->
+        <!-- Loading Overlay -->
         <div x-show="loading"
             class="fixed inset-0 z-[999] bg-dark/95 backdrop-blur-md flex flex-col items-center justify-center"
             x-transition.opacity x-cloak>
@@ -145,11 +160,11 @@
                 <div class="absolute inset-0 border-t-4 border-tiktokCyan rounded-full animate-spin"></div>
                 <i class="fa-brands fa-tiktok text-5xl text-white animate-bounce"></i>
             </div>
-            <h3 class="text-2xl font-black text-white mb-2 tracking-tight">ĐANG QUÉT DỮ LIỆU</h3>
-            <p class="text-sm text-tiktokCyan font-mono" x-text="loadingText">Kết nối vệ tinh...</p>
+            <h3 class="text-2xl font-black text-white mb-2 tracking-tight">ĐANG XỬ LÝ</h3>
+            <p class="text-sm text-tiktokCyan font-mono" x-text="loadingText">Vui lòng chờ...</p>
         </div>
 
-        <!-- User Stats & Quota -->
+        <!-- User Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-surface border border-white/10 rounded-2xl p-5 relative overflow-hidden">
                 <div class="absolute top-0 right-0 p-3 opacity-10"><i class="fa-solid fa-id-card text-6xl"></i></div>
@@ -167,32 +182,30 @@
                         <h3 class="text-2xl font-bold text-tiktokCyan"><span x-text="usage.used">0</span><span
                                 class="text-slate-500 text-lg">/<span x-text="usage.limit">...</span></span></h3>
                     </div>
+                    <div class="text-right">
+                        <p class="text-xs text-slate-400">Còn lại</p>
+                        <p class="font-bold text-white" x-text="Math.max(0, usage.limit - usage.used)">...</p>
+                    </div>
                 </div>
                 <div class="w-full bg-white/10 rounded-full h-2 mt-2">
                     <div class="bg-gradient-to-r from-tiktokCyan to-blue-500 h-2 rounded-full transition-all duration-500"
                         :style="'width: ' + Math.min(100, (usage.used / usage.limit) * 100) + '%'"></div>
                 </div>
             </div>
-
-            <!-- NÚT GỢI Ý KEYWORD AI (ĐÃ CẬP NHẬT TRẠNG THÁI LOADING) -->
-            <div class="bg-surface border border-white/10 rounded-2xl p-5 flex flex-col justify-center items-center text-center cursor-pointer transition-colors group shadow-[0_0_15px_rgba(0,242,234,0.1)]"
-                @click="!aiLoading && getAiKeywords()"
-                :class="{ 'hover:border-tiktokPink/50': !aiLoading, 'opacity-70 cursor-not-allowed border-white/5': aiLoading }">
-
-                <div class="w-10 h-10 rounded-full bg-tiktokPink/20 flex items-center justify-center mb-2 transition-transform"
-                    :class="{ 'group-hover:scale-110': !aiLoading }">
-                    <!-- Icon thay đổi khi Loading -->
+            <div class="bg-surface border border-white/10 rounded-2xl p-5 flex flex-col justify-center items-center text-center cursor-pointer hover:border-tiktokPink/50 transition-colors group shadow-[0_0_15px_rgba(0,242,234,0.1)]"
+                @click="getAiKeywords()">
+                <div
+                    class="w-10 h-10 rounded-full bg-tiktokPink/20 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                     <i class="fa-solid text-tiktokPink"
                         :class="aiLoading ? 'fa-circle-notch fa-spin' : 'fa-wand-magic-sparkles'"></i>
                 </div>
-
                 <p class="text-sm font-bold text-white group-hover:text-tiktokCyan"
                     x-text="aiLoading ? 'Đang phân tích...' : 'Gợi ý Keyword AI'"></p>
                 <p class="text-xs text-slate-500" x-show="!aiLoading">Bấm để lấy từ khóa hot theo vùng</p>
             </div>
         </div>
 
-        <!-- Filter Area (Giữ nguyên) -->
+        <!-- Filter Area -->
         <div class="bg-card border border-white/10 rounded-3xl p-6 shadow-xl mb-8">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                 <div class="md:col-span-4">
@@ -273,9 +286,14 @@
                 class="mt-4 text-xs font-bold text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20 flex items-center gap-2 animate-pulse">
                 <i class="fa-solid fa-triangle-exclamation"></i> <span x-text="error"></span>
             </div>
+            <div x-show="successMsg"
+                class="mt-4 text-xs font-bold text-green-400 bg-green-500/10 p-3 rounded-lg border border-green-500/20 flex items-center gap-2"
+                x-transition>
+                <i class="fa-solid fa-check-circle"></i> <span x-text="successMsg"></span>
+            </div>
         </div>
 
-        <!-- Results Table (Giữ nguyên) -->
+        <!-- Results Table -->
         <div class="bg-card border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col min-h-[600px]">
             <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5">
                 <div class="flex items-center gap-3">
@@ -385,6 +403,7 @@
                     </tbody>
                 </table>
             </div>
+
             <div class="p-5 border-t border-white/10 bg-black/20 flex flex-col md:flex-row justify-between items-center gap-4"
                 x-show="filteredVideos.length > 0">
                 <div class="text-xs text-slate-400 font-bold uppercase tracking-wide">Trang <span
@@ -435,11 +454,9 @@
                     <p class="text-sm text-slate-400 mb-4">Top từ khóa đang thịnh hành tại <span
                             class="text-tiktokCyan font-bold" x-text="params.region"></span>:</p>
                     <div class="flex flex-wrap gap-2 mb-6 max-h-[200px] overflow-y-auto">
-                        <template x-for="kw in keywords">
-                            <span
+                        <template x-for="kw in keywords"><span
                                 class="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-sm text-slate-200 hover:border-tiktokCyan transition-colors cursor-default select-all"
-                                :class="kw.startsWith('#') ? 'text-tiktokCyan' : ''" x-text="kw"></span>
-                        </template>
+                                :class="kw.startsWith('#') ? 'text-tiktokCyan' : ''" x-text="kw"></span></template>
                         <div x-show="keywords.length === 0" class="text-slate-500 italic text-sm w-full text-center">
                             <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Đang phân tích...
                         </div>
@@ -456,7 +473,7 @@
             </div>
         </div>
 
-        <!-- Pricing Modal -->
+        <!-- Pricing Modal (Upsell) - Updated Prices with Action Logic -->
         <div x-show="showPricing"
             class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl" x-cloak
             x-transition.opacity>
@@ -474,27 +491,33 @@
                     </p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Gói Basic -->
                     <div
                         class="group border border-white/10 bg-white/5 rounded-2xl p-8 hover:border-white/30 hover:bg-white/10 transition-all flex flex-col relative overflow-hidden">
                         <h3 class="text-xl font-bold text-white mb-2">Basic</h3>
-                        <div class="text-3xl font-black text-white mb-6">100k<span
+                        <div class="text-3xl font-black text-white mb-6">20k<span
                                 class="text-sm font-normal text-slate-500">/tháng</span></div>
                         <ul class="space-y-4 text-sm text-slate-300 mb-8 flex-grow">
                             <li class="flex items-center"><i class="fa-solid fa-check text-green-500 mr-3"></i> 50
                                 lượt quét/ngày</li>
                             <li class="flex items-center"><i class="fa-solid fa-check text-green-500 mr-3"></i> Xem
                                 Trending cơ bản</li>
-                        </ul><a href="/deposit"
-                            class="block w-full py-3 rounded-xl border border-white/20 text-center text-white font-bold hover:bg-white/20 transition-all">Chọn
-                            Gói</a>
+                        </ul>
+                        <button @click="buyPlan('basic', 20000)"
+                            class="block w-full py-3 rounded-xl border border-white/20 text-center text-white font-bold hover:bg-white/20 transition-all">
+                            <span x-show="userBalance < 20000">Nạp thêm <span
+                                    x-text="formatNumberVND(20000 - userBalance)"></span></span>
+                            <span x-show="userBalance >= 20000">Mua ngay</span>
+                        </button>
                     </div>
+                    <!-- Gói Pro -->
                     <div
                         class="group border-2 border-tiktokCyan bg-tiktokCyan/5 rounded-2xl p-8 relative transform md:-translate-y-4 shadow-[0_0_30px_rgba(0,242,234,0.1)] flex flex-col">
                         <div
                             class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-tiktokCyan text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
                             Khuyên dùng</div>
                         <h3 class="text-xl font-bold text-white mb-2">PRO</h3>
-                        <div class="text-3xl font-black text-tiktokCyan mb-6">250k<span
+                        <div class="text-3xl font-black text-tiktokCyan mb-6">79k<span
                                 class="text-sm font-normal text-slate-500">/tháng</span></div>
                         <ul class="space-y-4 text-sm text-slate-300 mb-8 flex-grow">
                             <li class="flex items-center"><i class="fa-solid fa-check text-tiktokCyan mr-3"></i>
@@ -503,16 +526,22 @@
                             <li class="flex items-center"><i class="fa-solid fa-check text-tiktokCyan mr-3"></i>
                                 <strong>Xem doanh thu Beta</strong>
                             </li>
-                            <li class="flex items-center"><i class="fa-solid fa-check text-tiktokCyan mr-3"></i> Phân
-                                tích AI</li>
-                        </ul><a href="/deposit"
-                            class="block w-full py-3.5 rounded-xl bg-gradient-to-r from-tiktokCyan to-blue-500 text-black text-center font-bold hover:opacity-90 hover:scale-105 transition-all shadow-lg">Nâng
-                            cấp ngay</a>
+                            <li class="flex items-center"><i class="fa-solid fa-check text-tiktokCyan mr-3"></i>
+                                <strong>Gợi ý Keyword dễ lên Xu hướng</strong>
+                            </li>
+                        </ul>
+                        <button @click="buyPlan('pro', 79000)"
+                            class="block w-full py-3.5 rounded-xl bg-gradient-to-r from-tiktokCyan to-blue-500 text-black text-center font-bold hover:opacity-90 hover:scale-105 transition-all shadow-lg">
+                            <span x-show="userBalance < 79000">Nạp thêm <span
+                                    x-text="formatNumberVND(79000 - userBalance)"></span></span>
+                            <span x-show="userBalance >= 79000">Nâng cấp ngay</span>
+                        </button>
                     </div>
+                    <!-- Gói Premium -->
                     <div
                         class="group border border-white/10 bg-white/5 rounded-2xl p-8 hover:border-tiktokPink/50 hover:bg-tiktokPink/5 transition-all flex flex-col relative overflow-hidden">
                         <h3 class="text-xl font-bold text-white mb-2">Premium</h3>
-                        <div class="text-3xl font-black text-white mb-6">500k<span
+                        <div class="text-3xl font-black text-white mb-6">150k<span
                                 class="text-sm font-normal text-slate-500">/tháng</span></div>
                         <ul class="space-y-4 text-sm text-slate-300 mb-8 flex-grow">
                             <li class="flex items-center"><i class="fa-solid fa-check text-tiktokPink mr-3"></i>
@@ -522,18 +551,21 @@
                                 cả tính năng PRO</li>
                             <li class="flex items-center"><i class="fa-solid fa-check text-tiktokPink mr-3"></i>
                                 Support 1-1 ưu tiên</li>
-                        </ul><a href="/deposit"
-                            class="block w-full py-3 rounded-xl border border-white/20 text-center text-white font-bold hover:bg-white/20 hover:border-tiktokPink hover:text-tiktokPink transition-all">Chọn
-                            Gói</a>
+                        </ul>
+                        <button @click="buyPlan('premium', 150000)"
+                            class="block w-full py-3 rounded-xl border border-white/20 text-center text-white font-bold hover:bg-white/20 hover:border-tiktokPink hover:text-tiktokPink transition-all">
+                            <span x-show="userBalance < 150000">Nạp thêm <span
+                                    x-text="formatNumberVND(150000 - userBalance)"></span></span>
+                            <span x-show="userBalance >= 150000">Mua ngay</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-
     </main>
 
     @php
-        // Giữ nguyên logic PHP cũ
+        // Logic PHP (Giữ nguyên)
         $user = Auth::user();
         $plan = $user->plan_type ?? 'free';
         $limit = 10;
@@ -579,6 +611,7 @@
             return {
                 loading: false,
                 error: null,
+                successMsg: null,
                 showPricing: false,
                 isProfileOpen: false,
                 loadingText: 'Đang kết nối...',
@@ -588,8 +621,9 @@
                 showAiModal: false,
                 copyText: 'Sao chép tất cả',
                 plan: '{{ $plan }}',
+                userBalance: {{ $user->balance ?? 0 }},
 
-                aiLoading: false, // Trạng thái loading cho nút AI
+                aiLoading: false,
 
                 currentPage: 1,
                 itemsPerPage: 10,
@@ -658,14 +692,77 @@
                         maximumFractionDigits: 1
                     }).format(num);
                 },
+                formatNumberVND(num) {
+                    return new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND'
+                    }).format(num);
+                },
                 formatTime(s) {
                     const m = Math.floor(s / 60);
                     const sc = s % 60;
                     return `${m}:${sc.toString().padStart(2,'0')}`;
                 },
 
+                // New Logic: Mua gói hoặc Chuyển trang nạp tiền
+                async buyPlan(planName, price) {
+                    if (this.userBalance < price) {
+                        const missing = price - this.userBalance;
+                        // Chuyển hướng sang trang deposit với số tiền thiếu
+                        window.location.href = `/deposit?amount=${missing}`;
+                        return;
+                    }
+
+                    if (!confirm(
+                            `Bạn có chắc chắn muốn mua gói ${planName.toUpperCase()} với giá ${this.formatNumberVND(price)}?`
+                        )) {
+                        return;
+                    }
+
+                    this.loading = true;
+                    this.loadingText = 'Đang xử lý giao dịch...';
+
+                    try {
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                        const res = await fetch('/tool/tiktok-beta/buy-plan', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken
+                            },
+                            body: JSON.stringify({
+                                plan: planName
+                            })
+                        });
+
+                        const data = await res.json();
+
+                        if (!res.ok) {
+                            throw new Error(data.message || 'Giao dịch thất bại');
+                        }
+
+                        // Thành công
+                        this.showPricing = false;
+                        this.successMsg = `Nâng cấp thành công gói ${planName.toUpperCase()}!`;
+                        this.userBalance = data.new_balance;
+                        this.usage.plan_name = data.plan_name;
+                        this.usage.limit = data.new_limit;
+                        this.usage.expiry_text = data.new_expiry;
+                        this.usage.is_expired = false;
+                        this.plan = planName; // Mở khóa tính năng ngay lập tức
+
+                        // Ẩn thông báo sau 3s
+                        setTimeout(() => this.successMsg = null, 3000);
+
+                    } catch (e) {
+                        this.error = e.message;
+                        setTimeout(() => this.error = null, 3000);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
                 async scan() {
-                    // Logic scan cũ
                     this.loading = true;
                     this.error = null;
                     this.videos = [];
@@ -707,31 +804,24 @@
                     }
                 },
 
-                // HÀM GET AI KEYWORDS MỚI - CHỐNG SPAM
                 async getAiKeywords() {
-                    // Nếu đang loading thì không làm gì cả (Chống spam)
                     if (this.aiLoading) return;
-
                     try {
-                        this.aiLoading = true; // Bắt đầu loading
+                        this.aiLoading = true;
                         this.copyText = 'Sao chép tất cả';
-
                         const res = await fetch(`/tool/tiktok-beta/ai-keywords?region=${this.params.region}`);
                         const data = await res.json();
-
                         if (data.is_demo) {
                             this.showAiModal = false;
                             this.showPricing = true;
                             return;
                         }
-
                         this.keywords = data.keywords;
                         this.showAiModal = true;
                     } catch (e) {
                         console.error(e);
-                        // Có thể thêm thông báo lỗi nhẹ ở đây
                     } finally {
-                        this.aiLoading = false; // Kết thúc loading
+                        this.aiLoading = false;
                     }
                 },
 

@@ -9,6 +9,7 @@ use App\Services\AIService;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class TikTokBetaController extends Controller
 {
@@ -178,5 +179,73 @@ class TikTokBetaController extends Controller
         }
         $keywords = $this->aiService->suggestKeywords($request->input('region'));
         return response()->json(['keywords' => $keywords, 'is_demo' => false]);
+    }
+
+    // --- MỚI: HÀM MUA GÓI ---
+    public function buyPlan(Request $request) {
+        $request->validate([
+            'plan' => 'required|in:basic,pro,premium'
+        ]);
+
+        $plan = $request->plan;
+        $prices = [
+            'basic' => 20000,
+            'pro' => 79000,
+            'premium' => 150000
+        ];
+        $price = $prices[$plan];
+        $user = Auth::user();
+
+        if ($user->balance < $price) {
+            return response()->json([
+                'message' => 'Số dư không đủ. Vui lòng nạp thêm.',
+                'missing' => $price - $user->balance
+            ], 400);
+        }
+
+        // Transaction DB để đảm bảo trừ tiền và cộng gói an toàn
+        DB::beginTransaction();
+        try {
+            // Trừ tiền
+            $user->balance -= $price;
+
+            // Logic cộng ngày VIP
+            $now = Carbon::now();
+            $expiresAt = $user->vip_expires_at ? Carbon::parse($user->vip_expires_at) : $now;
+
+            // QUAN TRỌNG: Sử dụng copy() để không làm biến đổi biến $now hoặc $expiresAt
+            if ($expiresAt->lt($now)) {
+                // Nếu đã hết hạn -> Tính từ bây giờ
+                $newExpiry = $now->copy()->addMonth();
+            } else {
+                // Nếu còn hạn -> Cộng dồn thêm 1 tháng
+                $newExpiry = $expiresAt->copy()->addMonth();
+            }
+
+            $user->plan_type = $plan;
+            $user->vip_expires_at = $newExpiry;
+            $user->save();
+
+            DB::commit();
+
+            // Tính toán lại limit để trả về frontend
+            $limits = ['basic' => 50, 'pro' => 200, 'premium' => 1000];
+
+            // Tính số ngày còn lại. Lưu ý: Dùng Carbon::now() mới để so sánh
+            $daysLeft = Carbon::now()->diffInDays($newExpiry, false);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Mua gói thành công!',
+                'new_balance' => $user->balance,
+                'plan_name' => ucfirst($plan),
+                'new_limit' => $limits[$plan],
+                'new_expiry' => 'Còn ' . ceil($daysLeft) . ' ngày' // Làm tròn lên
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Lỗi giao dịch: ' . $e->getMessage()], 500);
+        }
     }
 }

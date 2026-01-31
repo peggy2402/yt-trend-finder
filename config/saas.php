@@ -14,21 +14,21 @@ return [
             'daily_scans' => 50,
             'can_export' => true,
             'ai_analysis' => false,
-            'price' => 100000,
+            'price' => 20000,
         ],
         'pro' => [
             'name' => 'Chuyên nghiệp (Pro)',
             'daily_scans' => 200,
             'can_export' => true,
             'ai_analysis' => true,
-            'price' => 250000,
+            'price' => 79000,
         ],
         'premium' => [
             'name' => 'Cao cấp (Premium)',
             'daily_scans' => 1000,
             'can_export' => true,
             'ai_analysis' => true,
-            'price' => 500000,
+            'price' => 150000,
         ]
     ]
 ];

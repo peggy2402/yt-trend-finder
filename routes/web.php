@@ -55,6 +55,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/tool/tiktok-beta/search', [TikTokBetaController::class, 'search'])->name('tool.tiktok-beta.search');
     Route::get('/tool/tiktok-beta/ai-keywords', [TikTokBetaController::class, 'getAiKeywords'])->name('tool.tiktok-beta.ai');
 
+    // UPGRADE PLAN
+    Route::post('/tool/tiktok-beta/buy-plan', [TikTokBetaController::class, 'buyPlan'])->name('tool.tiktok-beta.buy-plan')->middleware('auth');
+
     // --- API MUA HÀNG ---
     Route::prefix('tool')->group(function () {
         Route::get('/profile', [ViaController::class, 'profile']);
